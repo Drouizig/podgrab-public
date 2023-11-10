@@ -9,6 +9,13 @@
     return this.charAt(0).toUpperCase() + this.slice(1);
   };
   const limit = 300;
+
+
+  function decode(html){
+          var txt = document.createElement("textarea");
+          txt.innerHTML = html;
+          return txt.value;
+  }
   function checkUseMore() {
     var elements = document.getElementsByClassName("useMore");
 
@@ -184,7 +191,7 @@
           return false;
         }
         axios
-          .delete("/podcasts/" + id)
+          .delete("/admin/podcasts/" + id)
           .then(function (response) {
             Vue.toasted.show("Podcast deleted successfully.", {
               theme: "bubble",

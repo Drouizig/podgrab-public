@@ -32,6 +32,9 @@
   </p>
 </p>
 
+DELETE podcast orphan item
+delete from podcast_items where podcast_items.podcast_id not in (select podcasts.id from podcasts, podcast_items where podcasts.id = podcast_items.podcast_id);
+
 <!-- TABLE OF CONTENTS -->
 
 ## Table of Contents

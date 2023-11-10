@@ -77,9 +77,9 @@ const (
 
 type Setting struct {
 	Base
-	DownloadOnAdd                 bool `gorm:"default:true"`
+	DownloadOnAdd                 bool `gorm:"default:false"`
 	InitialDownloadCount          int  `gorm:"default:5"`
-	AutoDownload                  bool `gorm:"default:true"`
+	AutoDownload                  bool `gorm:"default:false"`
 	AppendDateToFileName          bool `gorm:"default:false"`
 	AppendEpisodeNumberToFileName bool `gorm:"default:false"`
 	DarkMode                      bool `gorm:"default:false"`

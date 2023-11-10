@@ -70,12 +70,12 @@
       <div id="app" v-cloak>
 
   <button @click="toggleFilters()" class="u-full-width">
-    <span  v-show="!showFilters">Show Filters</span>
-    <span  v-show="showFilters">Hide Filters</span>
+    <span  v-show="!showFilters">Diskouez ar siloù</span>
+    <span  v-show="showFilters">Kuzhat ar siloù</span>
   </button>
     <form @submit.prevent="submitFilters()" v-show="showFilters">
       <div class="row">
-         <input class="columns five" type="search" @input="searchQueryUpated()" v-model="filter.q" placeholder="Search">
+         <input class="columns five" type="search" @input="searchQueryUpated()" v-model="filter.q" placeholder="Klask">
     <div class="columns three">    <vue-multiselect v-model="selectedSorting" :options="sortOptions" :searchable="false"
        :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
        placeholder="Sort By" label="Label" track-by="Value" :preselect-first="true">
@@ -83,32 +83,23 @@
     <div class="columns one">      <vue-multiselect :show-pointer="false"  v-model="filter.count" :options="pagingOptions" :searchable="false"  :allow-empty="false" :close-on-select="true" :show-labels="false" placeholder="Pick a value"></vue-multiselect>
 </div>
   
-<div class="columns three">    <vue-multiselect v-model="selectedPlayedStatus" :options="playedStatusOptions" :searchable="false"
-  :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
-  placeholder="Sort By" label="Label" track-by="Value" :preselect-first="true">
- </vue-multiselect></div>
       
    
   </div>
     <div class="row">
       <vue-multiselect class="columns three" v-model="selectedPodcasts" :options="podcasts"  :show-labels="false"
       :multiple="true" :close-on-select="false" :clear-on-select="false" 
-      :preserve-search="true" placeholder="Podcasts" label="Title" track-by="ID" :preselect-first="false">
+      :preserve-search="true" placeholder="Podksignadoù" label="Title" track-by="ID" :preselect-first="false">
         <template slot="selection" slot-scope="{ values, search, isOpen }">
           <span class="multiselect__single" v-if="values.length && !isOpen">${ values.length } options selected</span>
         </template>
       </vue-multiselect>
-      <vue-multiselect class="columns three" v-model="selectedTags"  :show-labels="false" :options="tags" :multiple="true" :close-on-select="false" :clear-on-select="false" :preserve-search="true" placeholder="Tags" label="Label" track-by="ID" :preselect-first="false">
+      <vue-multiselect class="columns three" v-model="selectedTags"  :show-labels="false" :options="tags" :multiple="true" :close-on-select="false" :clear-on-select="false" :preserve-search="true" placeholder="Rummadoù" label="Label" track-by="ID" :preselect-first="false">
         <template slot="selection" slot-scope="{ values, search, isOpen }"><span class="multiselect__single" v-if="values.length && !isOpen">${ values.length } options selected</span></template>
       </vue-multiselect>
-      <div class="columns three">    <vue-multiselect v-model="selectedDownloadStatus" :options="downloadStatusOptions" :searchable="false"
-        :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
-        placeholder="Sort By" label="Label" track-by="Value" :preselect-first="true">
-       </vue-multiselect></div>
        <div class="columns three">
-        <a title="Play items in this page" v-if="podcastItems.length" class="button" @click="playPage()"><i class="fas fa-play"></i></a>
-        <a title="Enqueue items in this page" v-if="podcastItems.length" class="button  button-enqueue" @click="enqueuePage()"><i class="fas fa-plus"></i></a>
-        <a title="Reset Filters" class="button" @click="resetFilters()"><i class="fas fa-undo"></i></a>
+        <a title="Lenn ar rannoù er bajenn-mañ" v-if="podcastItems.length" class="button" @click="playPage()"><i class="fas fa-play"></i></a>
+        <a title="Adderaouekaat ar siloù" class="button" @click="resetFilters()"><i class="fas fa-undo"></i></a>
        
       </div>
       
@@ -149,82 +140,23 @@
               <small> ${getFormattedDuration(item.Duration)}</small>
             </div>
           </div>
-          <p class="useMore">${item.Summary }</p>
-
-          <a
-          v-if="item.IsPlayed"
-          class="button button"
-          title="Mark as not listened"
-          @click="changePlayedStatus(item)"
-          ><i class="fas fa-envelope"></i
-        ></a>
-       
-        <a
-         v-if="!item.IsPlayed"
-          class="button button"
-          title="Mark as listened"
-          @click="changePlayedStatus(item)"
-          ><i class="fas fa-envelope-open"></i
-        ></a>
-        <a
-        v-if="!isBookmarked(item)"
-          class="button button"
-          title="Bookmark Episode"
-          @click="changeBookmarkStatus(item)"
-          ><i class="far fa-bookmark"></i
-        ></a>
+          <p class="useMore">${decode(item.Summary) }</p>
       
         <a
-        v-if="isBookmarked(item)"
-          class="button button"
-          title="Remove Bookmark"
-          @click="changeBookmarkStatus(item)"
-          ><i class="fas fa-bookmark"></i
-        ></a>
-
-        <a
-          v-if="item.DownloadPath"
+          v-if="item.FileURL"
           class="button"
-          :href="downloadFromServer(item)"
+          :href="item.FileURL"
           download
-          title="Download episode file"
+          title="Pellgargañ ar restr"
+          target="_blank"
           ><i class="fas fa-download"></i
         ></a>
-        <a
-          v-if="item.DownloadPath"
-          class="button button"
-          @click="deleteFile(item)"
-          title="Delete Podcast Episode File"
-          ><i class="fas fa-trash"></i
-        ></a>
-        <a
-        v-if="settings.AutoDownload && !item.DownloadPath"
-        class="button button"
-        @click="downloadToDisk(item)"
-        title="Download to server"
-        download
-        ><i class="fas fa-cloud-download-alt"></i
-      ></a>
-      <a
-      v-if="!settings.AutoDownload && !item.DownloadPath && item.DownloadStatus===3"
-        class="button button"
-        @click="downloadToDisk(item)"
-        title="Download to server"
-        download
-        ><i class="fas fa-cloud-download-alt"></i
-      ></a>
       <a
           class="button button"
           @click="openPlayer(item)"
-          title="Play Episode"
+          title="Lenn ar rann"
           ><i class="fas fa-play"></i
         ></a>
-        <a
-        class="button button-enqueue"
-        @click="enqueueEpisode(item)"
-        title="Add Episode to existing player playlist"
-        ><i class="fas fa-plus"></i
-      ></a>
         </div>  <div class="columns one"></div>
       </div>
      <hr />
@@ -428,6 +360,7 @@ var app = new Vue({
             str+=obj.minutes+":"+obj.seconds;
             return str;
           },
+
           getEpisodeImage(item){
             return "/podcastitems/"+item.ID+"/image"
           },
@@ -533,6 +466,9 @@ var app = new Vue({
             }
             return "/"+url
           },
+          decode(html){
+            return decode(html);
+          },
           getData(){
             var self=this;
             axios
@@ -542,7 +478,7 @@ var app = new Vue({
                 self.filter=response.data.filter;
                 self.saveFilter(self.filter);
                 self.updateUrl();
-                setPageTitle("Episodes ("+self.filter.totalCount+")")
+                setPageTitle("Rannoù ("+self.filter.totalCount+")")
               })
               .catch(function (error) {
                 if (error.response && error.response.data && error.response.data.message) {

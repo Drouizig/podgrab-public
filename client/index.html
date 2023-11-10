@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PodGrab</title>
+    <title>PodGrabzh</title>
     {{template "commoncss" .}}
     <style>
       .button-delete {
@@ -11,6 +11,9 @@
       }
       .podcasts .button {
         padding: 0 15px;
+      }
+      .podcasts .button-img {
+        padding: 0 4px;
       }
       img {
         display: none;
@@ -141,7 +144,7 @@
             </select>
 
             <select v-model="filterTag" v-if="allTags.length">
-              <option value="">All</option>
+              <option value="">An holl</option>
               <option v-for="option in allTags" v-bind:value="option.ID">
                 ${option.Label} (${option.Podcasts.length})
               </option>
@@ -187,6 +190,8 @@
             </div>
            <div class="contentContainer">
             <p class="useMore">${podcast.Summary}</p></div>
+            <div class="contentContainer">
+             <p class="autho">${podcast.Author}</p></div>
 
             <div class="row">
               <div class="columns" v-bind:class="{two:layout=='list', twelve:layout=='grid'}">
@@ -198,9 +203,8 @@
               class="columns"  v-bind:class="{two:layout=='list', twelve:layout=='grid'}"
               :title="getEpisodeCountTooltip(podcast)"
             >
-              <template v-if="podcast.DownloadingEpisodesCount">
-              (${podcast.DownloadingEpisodesCount})/</template>${podcast.DownloadedEpisodesCount}/${podcast.AllEpisodesCount}
-              episodes
+              ${podcast.AllEpisodesCount}
+              rann
             </div>
             <div class="columns" v-bind:class="{four:layout=='list', twelve:layout=='grid'}">
               <tagger :class="isMobile?'mobile':'desktop'" v-bind:podcast="podcast" v-on:getalltags="getAllTags()"></tagger>
@@ -232,17 +236,25 @@
                 <i class="fas fa-folder-minus"></i>
               </button> -->
 
-              <button
-                class="button"
-                title="Download all episode files"
-                @click="downloadAllEpisodes(podcast.ID)"
+              <a
+                class="button button-img"
+                title="Koumanantiñ war antenna pod"
+                :href="'antennapod-subscribe://'+podcast.URL"
               >
-                <i class="fas fa-download"></i>
-              </button>
+                <img class="fas" alt="" width="32" src="/webassets/AntennaPod_Icon_2.0.1.png"/>
+              </a>
+              
+              <a
+              class="button"
+              title="Gwazh RSS"
+              :href="podcast.URL"
+            >
+              <i class="fas fa-download"></i>
+            </a>
 
               <button
               class="button"
-              title="Play all episodes"
+              title="Lenn an holl rannoù"
               @click="playPodcast(podcast.ID)"
             >
               <i class="fas fa-play"></i>
@@ -256,30 +268,6 @@
           >
             <i class="fas fa-plus"></i>
           </button>
-          <button
-          class="button"
-          title="New episodes for this podcast are not being downloaded automatially. Click to resume download."
-          v-if="podcast.IsPaused"
-          @click="togglePause(podcast,false)"
-        >
-          <i style="color: greenyellow;" class="fas fa-dot-circle"></i>
-        </button>
-        <button
-        class="button"
-        title="Click to pause automatic downloading for this podcast."
-        v-if="!podcast.IsPaused"
-        @click="togglePause(podcast,true)"
-      >
-        <i style="color: red;" class="fas fa-dot-circle"></i>
-      </button>
-      <button
-      class="button"
-      title="Click to see details."
-      
-      @click="showDetails(podcast)"
-    >
-      <i  class="fas fa-info"></i>
-    </button>
             </div>
             </div>
           </div>
@@ -476,7 +464,7 @@
 
           var self=this;
              axios
-              .delete("/podcasts/"+this.podcast.ID+"/tags/"+tagId)
+              .delete("/admin/podcasts/"+this.podcast.ID+"/tags/"+tagId)
               .then(function (response) {
                 var i=-1;
                 for(i=0;i<self.tags.length;i++){
@@ -777,36 +765,36 @@
             sortOptions:[
               {
                 key:"name-asc",
-                label:"Name (A-Z)"
+                label:"Anv (A-Z)"
               },
               {
                 key:"name-desc",
-                label:"Name (Z-A)"
+                label:"Anv (Z-A)"
               },
               {
                 key:"lastEpisode-asc",
-                label:"Latest Episode (Old First)"
+                label:"Rann diwezhañ (kozh da gentañ)"
               },
               {
                 key:"lastEpisode-desc",
-                label:"Latest Episode (New First)"
+                label:"Rann diwezhañ (nevez da gentañ)"
               },
               
               {
                 key:"dateAdded-asc",
-                label:"Date Added (Old First)"
+                label:"Deiziad ouzhpennet (kozh da gentañ)"
               },
               {
                 key:"dateAdded-desc",
-                label:"Date Added (New First)"
+                label:"Deiziaf ouzhpennet (nevez da gentañ)"
               },
               {
                 key:"episodesCount-asc",
-                label:"Episodes Count (Asc)"
+                label:"Niver a rannoù (kresk)"
               },
               {
                 key:"episodesCount-desc",
-                label:"Episodes Count (Desc)"
+                label:"Niver a rannoù (digresk)"
               },
             ],
             podcasts:[],

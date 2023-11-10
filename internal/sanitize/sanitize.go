@@ -111,11 +111,11 @@ func HTML(s string) (output string) {
 		s = strings.Replace(s, "\n", "", -1)
 
 		// Then replace line breaks with newlines, to preserve that formatting
-		s = strings.Replace(s, "</p>", "\n", -1)
-		s = strings.Replace(s, "<br>", "\n", -1)
-		s = strings.Replace(s, "</br>", "\n", -1)
-		s = strings.Replace(s, "<br/>", "\n", -1)
-		s = strings.Replace(s, "<br />", "\n", -1)
+		// s = strings.Replace(s, "</p>", "\n", -1)
+		// s = strings.Replace(s, "<br>", "\n", -1)
+		// s = strings.Replace(s, "</br>", "\n", -1)
+		// s = strings.Replace(s, "<br/>", "\n", -1)
+		// s = strings.Replace(s, "<br />", "\n", -1)
 
 		// Walk through the string removing all tags
 		b := bytes.NewBufferString("")

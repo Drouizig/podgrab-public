@@ -71,42 +71,36 @@
         </div>
         <div class="columns seven">
           {{range .Podcasts}}
-          <img
+          <a href="/podcasts/{{.ID}}/view"><img
             class="podcast-image"
             src="{{.Image}}"
             title="{{.Title}}"
             alt="{{.Title}}"
             srcset=""
-          />
+          /></a>
           {{end}}
         </div>
 
         <div class="columns three">
-          <a
+          <!-- <a
             class="button button"
             onclick="deleteTag('{{.ID}}')"
             title="Delete Tag"
             ><i class="fas fa-trash"></i
-          ></a>
+          ></a> -->
           <a
             class="button button"
             onclick="playTag('{{.ID}}')"
-            title="Play all episodes of this tag"
+            title="Lenn holl rannoù ar rummad"
             ><i class="fas fa-play"></i
           ></a>
-          <a
-            class="button button-enqueue"
-            onclick="enqueueTag('{{.ID}}')"
-            title="Add Episode to existing player playlist"
-            ><i class="fas fa-plus"></i
-          ></a>
-          <a
+          <!-- <a
           class="button"
           href="/tags/{{.ID}}/rss"
           target="_blank"
-          title="Get Rss feed for this tag and import this in your favorite podcast player."
+          title="Kaout an RSS evit ar rummad-mañ."
           ><i class="fas fa-rss"></i
-        ></a>
+        ></a> -->
         </div>
       </div>
       <hr />

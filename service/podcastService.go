@@ -1,10 +1,11 @@
 package service
 
 import (
+	"bytes"
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,7 +17,6 @@ import (
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/model"
 	"github.com/antchfx/xmlquery"
-	strip "github.com/grokify/html-strip-tags-go"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -35,16 +35,24 @@ func ParseOpml(content string) (model.OpmlModel, error) {
 	return response, err
 }
 
-//FetchURL is
+// FetchURL is
 func FetchURL(url string) (model.PodcastData, []byte, error) {
 	body, err := makeQuery(url)
 	if err != nil {
 		return model.PodcastData{}, nil, err
 	}
 	var response model.PodcastData
-	err = xml.Unmarshal(body, &response)
+	err = xml.Unmarshal(removeIllegalUnicode(body), &response)
 	return response, body, err
 }
+
+func removeIllegalUnicode(input []byte) []byte {
+	result := bytes.ReplaceAll(input, []byte{byte(0x13)}, []byte{})
+	result = bytes.ReplaceAll(result, []byte{byte(0xc)}, []byte{})
+	result = bytes.ReplaceAll(result, []byte{byte(0x19)}, []byte{})
+	return result
+}
+
 func GetPodcastById(id string) *db.Podcast {
 	var podcast db.Podcast
 
@@ -78,6 +86,7 @@ func GetTagsByIds(ids []string) *[]db.Tag {
 }
 func GetAllPodcasts(sorting string) *[]db.Podcast {
 	var podcasts []db.Podcast
+	fmt.Println(sorting)
 	db.GetAllPodcasts(&podcasts, sorting)
 
 	stats, _ := db.GetPodcastEpisodeStats()
@@ -220,7 +229,7 @@ func AddPodcast(url string) (db.Podcast, error) {
 
 		podcast := db.Podcast{
 			Title:   data.Channel.Title,
-			Summary: strip.StripTags(data.Channel.Summary),
+			Summary: data.Channel.Summary,
 			Author:  data.Channel.Author,
 			Image:   data.Channel.Image.URL,
 			URL:     url,
@@ -327,9 +336,9 @@ func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 				downloadStatus = db.Deleted
 			}
 
-			summary := strip.StripTags(obj.Summary)
+			summary := obj.Summary
 			if summary == "" {
-				summary = strip.StripTags(obj.Description)
+				summary = obj.Description
 			}
 
 			podcastItem = db.PodcastItem{
@@ -723,7 +732,7 @@ func makeQuery(url string) ([]byte, error) {
 
 	defer resp.Body.Close()
 	fmt.Println("Response status:", resp.Status)
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 
 	return body, nil
 

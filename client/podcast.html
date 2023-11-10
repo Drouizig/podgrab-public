@@ -142,7 +142,7 @@
     <div class="columns nine">
         <h4>{{.Title}}</h4>
         <small>{{ formatDate .PubDate }}</small>
-        <p>{{ .Summary }}</p>
+        <p>{{ html.UnescapeString .Summary }}</p>
 
         {{if .DownloadPath}}
         <a class="button button-primary" href="{{ .DownloadPath }}" download>Download</a>

@@ -24,7 +24,7 @@ func GetPodcastsByURLList(urls []string, podcasts *[]Podcast) error {
 }
 func GetAllPodcasts(podcasts *[]Podcast, sorting string) error {
 	if sorting == "" {
-		sorting = "created_at"
+		sorting = "last_episode desc"
 	}
 	result := DB.Preload("Tags").Order(sorting).Find(&podcasts)
 	return result.Error

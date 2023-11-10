@@ -93,7 +93,7 @@
             </div>
           </div>
 
-          <p class="useMore">{{ .Summary }}</p>
+          <p class="useMore">{{ .Summary | htmlDecode }}</p>
 
           {{if .IsPlayed }}
           <a
@@ -128,39 +128,15 @@
 
           {{ end }}
 
-          {{if .DownloadPath}}
+          {{if .FileURL}}
           <a
             class="button"
-            href="/podcastitems/{{.ID}}/file"
+            href="{{.FileURL}}"
             download
-            title="Download episode file"
+            title="Pellgargañ ar restr"
             ><i class="fas fa-download"></i
           ></a>
-          <a
-            class="button button"
-            onclick="deleteFile('{{.ID}}')"
-            title="Delete Podcast Episode File"
-            ><i class="fas fa-trash"></i
-          ></a>
-
-
-          {{else}} {{if not $setting.AutoDownload}}
-          <a
-            class="button button"
-            onclick="downloadToDisk('{{.ID}}')"
-            title="Download to server"
-            download
-            ><i class="fas fa-cloud-download-alt"></i
-          ></a>
-          {{else}} {{if eq .DownloadStatus 3}}
-          <a
-            class="button button"
-            onclick="downloadToDisk('{{.ID}}')"
-            title="Download to server"
-            download
-            ><i class="fas fa-cloud-download-alt"></i
-          ></a>
-          {{end}} {{end}} {{end }}
+          {{end }}
           <a
           class="button button"
           onclick="openPlayer(['{{.ID}}'])"

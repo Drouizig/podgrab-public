@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/model"
 	"github.com/akhilrex/podgrab/service"
@@ -52,7 +54,7 @@ func HomePage(c *gin.Context) {
 	//var podcasts []db.Podcast
 	podcasts := service.GetAllPodcasts("")
 	setting := c.MustGet("setting").(*db.Setting)
-	c.HTML(http.StatusOK, "index.html", gin.H{"title": "Podgrab", "podcasts": podcasts, "setting": setting})
+	c.HTML(http.StatusOK, "index.html", gin.H{"title": "Podgrabzh", "podcasts": podcasts, "setting": setting})
 }
 func PodcastPage(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
@@ -169,7 +171,7 @@ func PlayerPage(c *gin.Context) {
 			title = fmt.Sprintf("Playing episodes with tags : %s", strings.Join(tagNames, ", "))
 		}
 	} else {
-		title = "Playing Latest Episodes"
+		title = "Lenn ar rannoù diwezhañ"
 		if err := db.GetPaginatedPodcastItems(1, 20, nil, nil, time.Time{}, &items, &totalCount); err != nil {
 			fmt.Println(err.Error())
 		}
@@ -235,10 +237,10 @@ func getSortOptions() interface{} {
 	return []struct {
 		Label, Value string
 	}{
-		{"Release (asc)", "release_asc"},
-		{"Release (desc)", "release_desc"},
-		{"Duration (asc)", "duration_asc"},
-		{"Duration (desc)", "duration_desc"},
+		{"Embann (kresk)", "release_asc"},
+		{"Embann (digresk)", "release_desc"},
+		{"Padelezh (kresk)", "duration_asc"},
+		{"Padelezh (digresk)", "duration_desc"},
 	}
 }
 func AllEpisodesPage(c *gin.Context) {
@@ -249,7 +251,7 @@ func AllEpisodesPage(c *gin.Context) {
 	podcasts := service.GetAllPodcasts("")
 	tags, _ := db.GetAllTags("")
 	toReturn := gin.H{
-		"title":        "All Episodes",
+		"title":        "Holl rannoù",
 		"podcastItems": []db.PodcastItem{},
 		"setting":      setting,
 		"page":         filter.Page,
@@ -291,7 +293,7 @@ func AllTagsPage(c *gin.Context) {
 			previousPage = page - 1
 		}
 		toReturn := gin.H{
-			"title":        "Tags",
+			"title":        "Rummadoù",
 			"tags":         tags,
 			"setting":      setting,
 			"page":         page,
@@ -388,4 +390,53 @@ func AddNewPodcast(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 	}
 
+}
+
+func ScrapRadioBreizhPage(c *gin.Context) {
+	filePath := "./text.html"
+
+	// Open and read the HTML file
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	var links []string
+	doc, err := goquery.NewDocumentFromReader(file)
+	doc.Find("a").Each(func(index int, element *goquery.Selection) {
+		href, exists := element.Attr("href")
+		if exists && strings.HasPrefix(href, "https://rss.radios.bzh/br/") {
+			links = append(links, href)
+		}
+	})
+	for _, link := range links {
+		service.AddPodcast(link)
+	}
+	service.RefreshEpisodes()
+}
+
+func httpClient() *http.Client {
+	client := http.Client{
+		CheckRedirect: func(r *http.Request, via []*http.Request) error {
+			//	r.URL.Opaque = r.URL.Path
+			return nil
+		},
+	}
+
+	return &client
+}
+
+func getRequest(url string) (*http.Request, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	setting := db.GetOrCreateSetting()
+	if len(setting.UserAgent) > 0 {
+		req.Header.Add("User-Agent", setting.UserAgent)
+	}
+
+	return req, nil
 }

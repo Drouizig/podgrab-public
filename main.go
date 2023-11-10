@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html"
 	"html/template"
 	"log"
 	"os"
@@ -126,6 +127,9 @@ func main() {
 			}
 			return fmt.Sprintf("%02d:%02d", mins, secs)
 		},
+		"htmlDecode": func(htmlStr string) string {
+			return html.UnescapeString(htmlStr)
+		},
 	}
 	tmpl := template.Must(template.New("main").Funcs(funcMap).ParseGlob("client/*"))
 
@@ -134,13 +138,17 @@ func main() {
 
 	pass := os.Getenv("PASSWORD")
 	var router *gin.RouterGroup
+	var adminRouter *gin.RouterGroup
 	if pass != "" {
-		router = r.Group("/", gin.BasicAuth(gin.Accounts{
+		adminRouter = r.Group("/admin", gin.BasicAuth(gin.Accounts{
 			"podgrab": pass,
 		}))
 	} else {
-		router = &r.RouterGroup
+		adminRouter = r.Group("/admin", gin.BasicAuth(gin.Accounts{
+			"podgrab": "podgrab",
+		}))
 	}
+	router = r.Group("/")
 
 	dataPath := os.Getenv("DATA")
 	backupPath := path.Join(os.Getenv("CONFIG"), "backups")
@@ -152,11 +160,11 @@ func main() {
 	router.GET("/podcasts", controllers.GetAllPodcasts)
 	router.GET("/podcasts/:id", controllers.GetPodcastById)
 	router.GET("/podcasts/:id/image", controllers.GetPodcastImageById)
-	router.DELETE("/podcasts/:id", controllers.DeletePodcastById)
+	adminRouter.DELETE("/podcasts/:id", controllers.DeletePodcastById)
 	router.GET("/podcasts/:id/items", controllers.GetPodcastItemsByPodcastId)
-	router.GET("/podcasts/:id/download", controllers.DownloadAllEpisodesByPodcastId)
-	router.DELETE("/podcasts/:id/items", controllers.DeletePodcastEpisodesById)
-	router.DELETE("/podcasts/:id/podcast", controllers.DeleteOnlyPodcastById)
+	adminRouter.GET("/podcasts/:id/download", controllers.DownloadAllEpisodesByPodcastId)
+	adminRouter.DELETE("/podcasts/:id/items", controllers.DeletePodcastEpisodesById)
+	adminRouter.DELETE("/podcasts/:id/podcast", controllers.DeleteOnlyPodcastById)
 	router.GET("/podcasts/:id/pause", controllers.PausePodcastById)
 	router.GET("/podcasts/:id/unpause", controllers.UnpausePodcastById)
 	router.GET("/podcasts/:id/rss", controllers.GetRssForPodcastById)
@@ -165,12 +173,12 @@ func main() {
 	router.GET("/podcastitems/:id", controllers.GetPodcastItemById)
 	router.GET("/podcastitems/:id/image", controllers.GetPodcastItemImageById)
 	router.GET("/podcastitems/:id/file", controllers.GetPodcastItemFileById)
-	router.GET("/podcastitems/:id/markUnplayed", controllers.MarkPodcastItemAsUnplayed)
-	router.GET("/podcastitems/:id/markPlayed", controllers.MarkPodcastItemAsPlayed)
-	router.GET("/podcastitems/:id/bookmark", controllers.BookmarkPodcastItem)
-	router.GET("/podcastitems/:id/unbookmark", controllers.UnbookmarkPodcastItem)
+	adminRouter.GET("/podcastitems/:id/markUnplayed", controllers.MarkPodcastItemAsUnplayed)
+	adminRouter.GET("/podcastitems/:id/markPlayed", controllers.MarkPodcastItemAsPlayed)
+	adminRouter.GET("/podcastitems/:id/bookmark", controllers.BookmarkPodcastItem)
+	adminRouter.GET("/podcastitems/:id/unbookmark", controllers.UnbookmarkPodcastItem)
 	router.PATCH("/podcastitems/:id", controllers.PatchPodcastItemById)
-	router.GET("/podcastitems/:id/download", controllers.DownloadPodcastItem)
+	adminRouter.GET("/podcastitems/:id/download", controllers.DownloadPodcastItem)
 	router.GET("/podcastitems/:id/delete", controllers.DeletePodcastItem)
 
 	router.GET("/tags", controllers.GetAllTags)
@@ -181,17 +189,18 @@ func main() {
 	router.POST("/podcasts/:id/tags/:tagId", controllers.AddTagToPodcast)
 	router.DELETE("/podcasts/:id/tags/:tagId", controllers.RemoveTagFromPodcast)
 
-	router.GET("/add", controllers.AddPage)
+	adminRouter.GET("/add", controllers.AddPage)
 	router.GET("/search", controllers.Search)
 	router.GET("/", controllers.HomePage)
 	router.GET("/podcasts/:id/view", controllers.PodcastPage)
 	router.GET("/episodes", controllers.AllEpisodesPage)
 	router.GET("/allTags", controllers.AllTagsPage)
-	router.GET("/settings", controllers.SettingsPage)
-	router.POST("/settings", controllers.UpdateSetting)
-	router.GET("/backups", controllers.BackupsPage)
-	router.POST("/opml", controllers.UploadOpml)
-	router.GET("/opml", controllers.GetOmpl)
+	adminRouter.GET("/settings", controllers.SettingsPage)
+	adminRouter.POST("/settings", controllers.UpdateSetting)
+	adminRouter.GET("/backups", controllers.BackupsPage)
+	adminRouter.POST("/opml", controllers.UploadOpml)
+	adminRouter.GET("/opml", controllers.GetOmpl)
+	// adminRouter.GET("/scrap", controllers.ScrapRadioBreizhPage)
 	router.GET("/player", controllers.PlayerPage)
 	router.GET("/rss", controllers.GetRss)
 
@@ -220,7 +229,7 @@ func setupSettings() gin.HandlerFunc {
 func intiCron() {
 	checkFrequency, err := strconv.Atoi(os.Getenv("CHECK_FREQUENCY"))
 	if err != nil {
-		checkFrequency = 30
+		checkFrequency = 3600
 		log.Print(err)
 	}
 	service.UnlockMissedJobs()
