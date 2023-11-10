@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.15.2
+ARG GO_VERSION=1.17
 
 FROM golang:${GO_VERSION}-alpine AS builder
 
@@ -15,8 +15,6 @@ COPY . .
 RUN go build -o ./app ./main.go
 
 FROM alpine:latest
-
-LABEL org.opencontainers.image.source="https://github.com/akhilrex/podgrab"
 
 ENV CONFIG=/config
 ENV DATA=/assets

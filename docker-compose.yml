@@ -1,13 +1,15 @@
 version: "2.1"
 services:
   podgrab:
-    image: akhilrex/podgrab
+    build:
+      context: .
     container_name: podgrab
     environment:
-      - CHECK_FREQUENCY=240
+      - CHECK_FREQUENCY=3600
+      - PASSWORD=podgrab
     volumes:
-      - /path/to/config:/config
-      - /path/to/data:/assets
+      - ./config:/config
+      - ./assets:/assets
     ports:
       - 8080:8080
     restart: unless-stopped
