@@ -312,7 +312,7 @@
   </Modal>
  </div>
     </div>
-    {{template "scripts".}}
+    {{template "scripts" .}}
     <script src="/webassets/popper.min.js"></script>
     <script src="/webassets/tippy-bundle.umd.min.js"></script>
     <script src="/webassets/stopword.js"></script>
@@ -369,7 +369,7 @@
               return;
             }
              axios
-              .post("/tags",{label:self.newTag})
+              .post("/admin/tags",{label:self.newTag})
               .then(function (response) {
                 self.tags.push(response.data);
                 self.addTag(response.data.ID);
@@ -412,7 +412,7 @@
 
           var self=this;
              axios
-              .post("/podcasts/"+this.podcast.ID+"/tags/"+tagId)
+              .post("/admin/podcasts/"+this.podcast.ID+"/tags/"+tagId)
               .then(function (response) {
                 var i=-1;
                 for(i=0;i<self.allTags.length;i++){
@@ -637,7 +637,7 @@
           getAllTags(){
             var self=this;
              axios
-              .get("/tags")
+              .get("/br/tags")
               .then(function (response) {
                 self.allTags=response.data;
               })

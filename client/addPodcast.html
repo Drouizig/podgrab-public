@@ -86,7 +86,7 @@
             ></i
           >
           <br />
-          <form action="/search" method="post" @submit="search">
+          <form action="/admin/search" method="post" @submit="search">
             <div class="seven columns">
               <input
                 type="search"
@@ -244,7 +244,7 @@
             var self = this;
             self.searching = true;
             axios
-              .get(encodeURI("/search?q=" + this.query+"&searchSource="+this.searchSource))
+              .get(encodeURI("/admin/search?q=" + this.query+"&searchSource="+this.searchSource))
               .then(function (response) {
                 self.results = response.data;
               })
@@ -265,7 +265,7 @@
             var self = this;
             self.searching = true;
             axios
-              .post("/podcasts", {
+              .post("/admin/podcasts", {
                 url: item.url,
               })
               .then(function (response) {

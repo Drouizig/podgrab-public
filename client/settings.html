@@ -49,7 +49,7 @@
 <hr>
 <div class="row" id="app">
     <div class="columns six">
-    <form action="/saveSettings" method="post" @submit="saveSettings" >
+    <form action="/admin/settings" method="post" @submit="saveSettings" >
         <div class="row">
             <h3>Settings</h3>
         <label for="downloadOnAdd">
@@ -178,7 +178,7 @@ var app = new Vue({
           e.preventDefault();
           var self=this;
         self.searching=true;
-        axios.post("/settings",{
+        axios.post("/admin/settings",{
             downloadOnAdd: self.downloadOnAdd,
             initialDownloadCount:self.initialDownloadCount,
             autoDownload:self.autoDownload,

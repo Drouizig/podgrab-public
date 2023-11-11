@@ -184,6 +184,16 @@ func main() {
 		}),
 	))
 
+	adminRouter.Use(ginI18n.Localize(
+		ginI18n.WithBundle(&ginI18n.BundleCfg{
+			RootPath:         "./translations",
+			AcceptLanguage:   []language.Tag{language.Make("ga"), language.Make("fr"), language.Make("br")},
+			DefaultLanguage:  language.Make("br"),
+			UnmarshalFunc:    toml.Unmarshal,
+			FormatBundleFile: "toml",
+		}),
+	))
+
 	dataPath := os.Getenv("DATA")
 	backupPath := path.Join(os.Getenv("CONFIG"), "backups")
 
@@ -191,7 +201,7 @@ func main() {
 	assetsRouter.Static("/webassets", "./webassets")
 	assetsRouter.Static("/assets", dataPath)
 	router.Static(backupPath, backupPath)
-	router.POST("/podcasts", controllers.AddPodcast)
+	adminRouter.POST("/podcasts", controllers.AddPodcast)
 	router.GET("/podcasts", controllers.GetAllPodcasts)
 	router.GET("/podcasts/:id", controllers.GetPodcastById)
 	assetsRouter.GET("/podcasts/:id/image", controllers.GetPodcastImageById)
@@ -219,13 +229,13 @@ func main() {
 	router.GET("/tags", controllers.GetAllTags)
 	router.GET("/tags/:id", controllers.GetTagById)
 	router.GET("/tags/:id/rss", controllers.GetRssForTagById)
-	router.DELETE("/tags/:id", controllers.DeleteTagById)
-	router.POST("/tags", controllers.AddTag)
-	router.POST("/podcasts/:id/tags/:tagId", controllers.AddTagToPodcast)
-	router.DELETE("/podcasts/:id/tags/:tagId", controllers.RemoveTagFromPodcast)
+	adminRouter.DELETE("/tags/:id", controllers.DeleteTagById)
+	adminRouter.POST("/tags", controllers.AddTag)
+	adminRouter.POST("/podcasts/:id/tags/:tagId", controllers.AddTagToPodcast)
+	adminRouter.DELETE("/podcasts/:id/tags/:tagId", controllers.RemoveTagFromPodcast)
 
 	adminRouter.GET("/add", controllers.AddPage)
-	router.GET("/search", controllers.Search)
+	adminRouter.GET("/search", controllers.Search)
 	router.GET("/", controllers.HomePage)
 	adminRouter.GET("/", controllers.HomePageAdmin)
 	router.GET("/podcasts/:id/view", controllers.PodcastPage)

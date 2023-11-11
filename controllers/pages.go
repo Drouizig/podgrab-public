@@ -49,7 +49,7 @@ var searchProvider = map[string]service.SearchService{
 
 func AddPage(c *gin.Context) {
 	setting := c.MustGet("setting").(*db.Setting)
-	c.HTML(http.StatusOK, "addPodcast.html", gin.H{"title": "Add Podcast", "setting": setting, "searchOptions": searchOptions})
+	c.HTML(http.StatusOK, "addPodcast.html", gin.H{"title": "Add Podcast", "context": c, "lang": "br", "setting": setting, "searchOptions": searchOptions})
 }
 func SelectLang(c *gin.Context) {
 
@@ -95,7 +95,12 @@ func HomePageAdmin(c *gin.Context) {
 	//var podcasts []db.Podcast
 	podcasts := service.GetAllPodcasts("")
 	setting := c.MustGet("setting").(*db.Setting)
-	c.HTML(http.StatusOK, "index_admin.html", gin.H{"lang": "admin", "title": "Podgrabzh admin", "podcasts": podcasts, "setting": setting})
+	c.HTML(http.StatusOK, "index_admin.html",
+		gin.H{"lang": "br",
+			"context":  c,
+			"title":    "Podgrabzh admin",
+			"podcasts": podcasts,
+			"setting":  setting})
 }
 func PodcastPage(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
