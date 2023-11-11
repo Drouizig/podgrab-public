@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{.title}} - PodGrab</title>
+    <title>{{trans .title .context}} - PodGrab</title>
     {{template "commoncss" .}}
     
     <style>
@@ -779,7 +779,7 @@ div#large-visualization{
    
     </div>
 
-    {{template "scripts"}}
+    {{template "scripts".}}
     <script src="/webassets/amplitude.min.js"></script>
 
     <style>

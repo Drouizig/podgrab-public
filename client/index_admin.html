@@ -15,9 +15,6 @@
       .podcasts .button-img {
         padding: 0 4px;
       }
-      .podcasts .button-img img {
-        vertical-align: middle;
-      }
       img {
         display: none;
       }
@@ -130,15 +127,15 @@
   </head>
   <body>
     <div class="container">
-      {{template "navbar" .}}
+      {{template "navbar_admin" .}}
 
    
       <br />
-      <p>{{ trans "home_missing" .context }}</p>
+
       <div id="app" v-cloak>
         <div class="row">
-          <div class="columns five">&nbsp;</div>
-          <div class="columns seven" :class="isMobile?'alignLeft':'alignRight'">
+          <div class="columns six">&nbsp;</div>
+          <div class="columns six" :class="isMobile?'alignLeft':'alignRight'">
             <select v-model="sortOrder" name="" id="">
               <option v-for="option in sortOptions" v-bind:value="option.key">
                 ${option.label}
@@ -147,7 +144,7 @@
             </select>
 
             <select v-model="filterTag" v-if="allTags.length">
-              <option value="">{{ trans "home_filters_tags_all" .context }}</option>
+              <option value="">An holl</option>
               <option v-for="option in allTags" v-bind:value="option.ID">
                 ${option.Label} (${option.Podcasts.length})
               </option>
@@ -173,7 +170,7 @@
          
         <div :key="podcast.ID" class="podcasts" :title="podcast.Title"  v-bind:class="{row:layout=='list', two:layout=='grid', columns:layout=='grid'}" v-bind:id="'podcast-'+podcast.ID"  >
           <div class="columns imageContainer" v-bind:class="{two:layout=='list', twelve:layout=='grid'}">
-            <a style="text-decoration: none" :href="'/{{.lang}}/podcasts/'+podcast.ID+'/view'">
+            <a style="text-decoration: none" :href="'/podcasts/'+podcast.ID+'/view'">
             <img
               onerror="onImageError(this)"
               class="u-full-width"
@@ -185,7 +182,7 @@
           </div>
           <div class="columns" v-bind:class="{ten:layout=='list', twelve:layout=='grid',paused:podcast.IsPaused}">
             <div class="titleContainer">
-            <a style="text-decoration: none" :href="'/{{.lang}}/podcasts/'+podcast.ID+'/view'">
+            <a style="text-decoration: none" :href="'/podcasts/'+podcast.ID+'/view'">
               <h3 v-if="layout=='list'">${podcast.Title}</h3>
               <h5 v-if="layout=='grid'">${podcast.Title} </h5>
              
@@ -199,44 +196,45 @@
             <div class="row">
               <div class="columns" v-bind:class="{two:layout=='list', twelve:layout=='grid'}">
                 
-                <span v-if="podcast.LastEpisode">${getFormattedLastEpisodeDate(podcast)}</span> 
+                <span v-if="podcast.LastEpisode" :title="'Last Episode aired on '+getFormattedLastEpisodeDate(podcast)">${getFormattedLastEpisodeDate(podcast)}</span> 
               </div>
 
               <div
               class="columns"  v-bind:class="{two:layout=='list', twelve:layout=='grid'}"
+              :title="getEpisodeCountTooltip(podcast)"
             >
               ${podcast.AllEpisodesCount}
-              {{ trans "podcast_episodes" .context }}
+              rann
             </div>
             <div class="columns" v-bind:class="{four:layout=='list', twelve:layout=='grid'}">
               <tagger :class="isMobile?'mobile':'desktop'" v-bind:podcast="podcast" v-on:getalltags="getAllTags()"></tagger>
               
             </div>
             <div class="columns"   v-bind:class="{four:layout=='list', twelve:layout=='grid'}">
-
-              <a
-                class="button button-img"
-                title="{{ trans "podcast_subscribe_antennapod" .context }}"
-                :href="'antennapod-subscribe://'+podcast.URL"
-              >
-                <img class="fas" alt="" width="32" src="/webassets/AntennaPod_Icon_2.0.1.png"/>
-              </a>
-              
-              <a
-              class="button"
-              title="{{ trans "podcast_rss" .context }}"
-              :href="podcast.URL"
-            >
-              <i class="fas fa-rss"></i>
-            </a>
-
               <button
-              class="button"
-              title="{{ trans "podcast_play_all" .context }}"
-              @click="playPodcast(podcast.ID)"
-            >
-              <i class="fas fa-play"></i>
-            </button>
+                class="button button-delete deletePodcast"
+                :data-id="podcast.ID"
+                title="Delete Podcast and episode files"
+              >
+                <i class="fas fa-trash"></i>
+                   </button>
+                  <div :id="'deleteDdl-'+podcast.ID" style="display: none">
+              <ul>
+                 <li style="list-style: none;">   <button class="button" :data-id="podcast.ID" onclick="deletePodcast(this)" >Delete Files and Podcast</button></li>
+                
+                  <li style="list-style: none;">  <button class="button" :data-id="podcast.ID" onclick="deletePodcastEpisodes(this)">Delete Files, Keep Podcast</button></li>
+                
+                    <li style="list-style: none;">  <button class="button" :data-id="podcast.ID" onclick="deleteOnlyPodcast(this)">Keep Files, Delete Podcast</button></li>
+                  </ul>
+                </div>
+              
+              <button
+                class="button button-delete"
+                title="Delete only episode files"
+                @click="deletePodcastEpisodes(podcast.ID)"
+              >
+                <i class="fas fa-folder-minus"></i>
+              </button>
             </div>
             </div>
           </div>
@@ -314,7 +312,7 @@
   </Modal>
  </div>
     </div>
-    {{template "scripts" .}}
+    {{template "scripts".}}
     <script src="/webassets/popper.min.js"></script>
     <script src="/webassets/tippy-bundle.umd.min.js"></script>
     <script src="/webassets/stopword.js"></script>
@@ -323,8 +321,26 @@
  
     <template id="editTags">
       <div class="tags">
-          <i class="fas fa-tags"></i> 
-          ${ commaSeparatedTags() }
+        <div @click="editTags" style="cursor: pointer;">
+        <i class="fas fa-tags"></i> 
+       ${ commaSeparatedTags() }        
+      </div>
+       <div v-if="editing" class="tag-editor">
+         <h5>Tags: ${podcast.Title}</h5>
+          <div class="available">
+           Add: <a style="cursor: pointer;" href="#"  @click.prevent="addTag(tag.ID, $event);return false;" v-for="tag in availableTags" class="pill"><i class="fa fa-plus-circle"></i>${tag.Label}</a>
+         </div>
+         <div class="existing" v-if="tags.length">
+           Remove: <a style="cursor: pointer;"  @click.prevent="removeTag(tag.ID, $event);return false;" href="#" v-for="tag in tags" class="pill"><i class="fa fa-minus-circle"></i>${tag.Label}</a>
+         </div>
+         <div class="create">
+           <form @submit.prevent="createNewTag" method="post">
+           <input type="text" name="newTag" id="" placeholder="Create New Tag" v-model="newTag">
+           <input type="submit" value="Add">
+          </form>
+         </div>
+         <button class="button" @click="editing=false">Close</button>
+       </div>
        </div>
     </template>
     <script>
@@ -371,7 +387,8 @@
             if(!this.tags.length){
               return "";
             }
-            toReturn= this.tags.map(function(x){return app.tagTranslations[x.Label]}).join(", ");
+
+            toReturn= this.tags.map(function(x){return x.Label}).join(", ");
             return toReturn;
           },
           editTags(){
@@ -598,16 +615,16 @@
                 return title
           },
           getFormattedLastEpisodeDate(podcast){
-           const options={month:"numeric", day:"numeric", year:"numeric"}
+           const options={month:"short", day:"numeric", year:"numeric"}
            //todo: this is a really dirty hack which needs to be fixed when we work on the episode page
            var dt=new Date(Date.parse(podcast.LastEpisode.substr(0,10)));
-           return dt.toLocaleDateString(options)
+           return dt.toDateString()
           },
           getFormattedDate(date){
-           const options={month:"numeric", day:"numeric", year:"numeric"}
+           const options={month:"short", day:"numeric", year:"numeric"}
            //todo: this is a really dirty hack which needs to be fixed when we work on the episode page
            var dt=new Date(Date.parse(date.substr(0,10)));
-           return dt.toLocaleDateString(options)
+           return dt.toDateString()
           },
           downloadAllEpisodes(id) { downloadAllEpisodes(id);},
           deletePodcast(id){ deletePodcast(id,()=>{
@@ -620,7 +637,7 @@
           getAllTags(){
             var self=this;
              axios
-              .get("/{{.lang}}/tags")
+              .get("/tags")
               .then(function (response) {
                 self.allTags=response.data;
               })
@@ -715,42 +732,41 @@
             sortOptions:[
               {
                 key:"name-asc",
-                label:"{{ trans "home_filters_name_asc" .context }}"
+                label:"Anv (A-Z)"
               },
               {
                 key:"name-desc",
-                label:"{{ trans "home_filters_name_desc" .context }}"
+                label:"Anv (Z-A)"
               },
               {
                 key:"lastEpisode-asc",
-                label:"{{ trans "home_filters_episode_asc" .context }}"
+                label:"Rann diwezhañ (kozh da gentañ)"
               },
               {
                 key:"lastEpisode-desc",
-                label:"{{ trans "home_filters_episode_desc" .context }}"
+                label:"Rann diwezhañ (nevez da gentañ)"
               },
               
               {
                 key:"dateAdded-asc",
-                label:"{{ trans "home_filters_added_asc" .context }}"
+                label:"Deiziad ouzhpennet (kozh da gentañ)"
               },
               {
                 key:"dateAdded-desc",
-                label:"{{ trans "home_filters_added_desc" .context }}"
+                label:"Deiziaf ouzhpennet (nevez da gentañ)"
               },
               {
                 key:"episodesCount-asc",
-                label:"{{ trans "home_filters_count_asc" .context }}"
+                label:"Niver a rannoù (kresk)"
               },
               {
                 key:"episodesCount-desc",
-                label:"{{ trans "home_filters_count_desc" .context }}"
+                label:"Niver a rannoù (digresk)"
               },
             ],
             podcasts:[],
             {{ $len := len .podcasts}}
             allPodcasts: {{if gt $len 0}} {{ .podcasts }} {{else}} [] {{end}},
-            tagTranslations: {{.tagTranslations}},
         }})
      
     </script>

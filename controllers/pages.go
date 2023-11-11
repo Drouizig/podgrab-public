@@ -15,6 +15,7 @@ import (
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/model"
 	"github.com/akhilrex/podgrab/service"
+	ginI18n "github.com/gin-contrib/i18n"
 	"github.com/gin-gonic/gin"
 )
 
@@ -50,11 +51,51 @@ func AddPage(c *gin.Context) {
 	setting := c.MustGet("setting").(*db.Setting)
 	c.HTML(http.StatusOK, "addPodcast.html", gin.H{"title": "Add Podcast", "setting": setting, "searchOptions": searchOptions})
 }
+func SelectLang(c *gin.Context) {
+
+	var acceptLanguages []string = parseAcceptLanguages(c.Request)
+	var language string = "br"
+	for _, element := range acceptLanguages {
+		if isInSlice(element, []string{"br", "fr"}) {
+			language = element
+		}
+	}
+
+	c.Redirect(http.StatusFound, "/"+language)
+}
 func HomePage(c *gin.Context) {
+	if !isInSlice(c.Param("lang"), []string{"br", "fr", "ga"}) {
+		c.Redirect(http.StatusFound, "/br")
+	}
+	podcasts := service.GetAllPodcasts("")
+	tags, _ := db.GetAllTags("")
+	tagTranslations := make(map[string]string)
+	for _, tag := range *tags {
+		var originalLabel = tag.Label
+		var translatedLabel, err = ginI18n.GetMessage(c, "tag_"+tag.Label)
+		if nil != err {
+			translatedLabel = originalLabel
+		}
+		tagTranslations[originalLabel] = translatedLabel
+	}
+
+	setting := c.MustGet("setting").(*db.Setting)
+	c.HTML(http.StatusOK, "index.html",
+		gin.H{
+			"tagTranslations": tagTranslations,
+			"title":           "homepage_title",
+			"context":         c,
+			"lang":            c.Param("lang"),
+			"podcasts":        podcasts,
+			"setting":         setting,
+		},
+	)
+}
+func HomePageAdmin(c *gin.Context) {
 	//var podcasts []db.Podcast
 	podcasts := service.GetAllPodcasts("")
 	setting := c.MustGet("setting").(*db.Setting)
-	c.HTML(http.StatusOK, "index.html", gin.H{"title": "Podgrabzh", "podcasts": podcasts, "setting": setting})
+	c.HTML(http.StatusOK, "index_admin.html", gin.H{"lang": "admin", "title": "Podgrabzh admin", "podcasts": podcasts, "setting": setting})
 }
 func PodcastPage(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
@@ -89,6 +130,8 @@ func PodcastPage(c *gin.Context) {
 					to = totalCount
 				}
 				c.HTML(http.StatusOK, "episodes.html", gin.H{
+					"context":        c,
+					"lang":           c.Param("lang"),
 					"title":          podcast.Title,
 					"podcastItems":   podcast.PodcastItems[from:to],
 					"setting":        setting,
@@ -171,7 +214,7 @@ func PlayerPage(c *gin.Context) {
 			title = fmt.Sprintf("Playing episodes with tags : %s", strings.Join(tagNames, ", "))
 		}
 	} else {
-		title = "Lenn ar rannoù diwezhañ"
+		title = "player_title"
 		if err := db.GetPaginatedPodcastItems(1, 20, nil, nil, time.Time{}, &items, &totalCount); err != nil {
 			fmt.Println(err.Error())
 		}
@@ -179,6 +222,8 @@ func PlayerPage(c *gin.Context) {
 	setting := c.MustGet("setting").(*db.Setting)
 
 	c.HTML(http.StatusOK, "player.html", gin.H{
+		"context":        c,
+		"lang":           c.Param("lang"),
 		"title":          title,
 		"podcastItems":   items,
 		"setting":        setting,
@@ -251,7 +296,9 @@ func AllEpisodesPage(c *gin.Context) {
 	podcasts := service.GetAllPodcasts("")
 	tags, _ := db.GetAllTags("")
 	toReturn := gin.H{
-		"title":        "Holl rannoù",
+		"title":        "episodes_title",
+		"context":      c,
+		"lang":         c.Param("lang"),
 		"podcastItems": []db.PodcastItem{},
 		"setting":      setting,
 		"page":         filter.Page,
@@ -293,7 +340,9 @@ func AllTagsPage(c *gin.Context) {
 			previousPage = page - 1
 		}
 		toReturn := gin.H{
-			"title":        "Rummadoù",
+			"title":        "tags_title",
+			"context":      c,
+			"lang":         c.Param("lang"),
 			"tags":         tags,
 			"setting":      setting,
 			"page":         page,
@@ -439,4 +488,33 @@ func getRequest(url string) (*http.Request, error) {
 	}
 
 	return req, nil
+}
+func parseAcceptLanguages(r *http.Request) []string {
+	acceptLanguage := r.Header.Get("Accept-Language")
+
+	// If the Accept-Language header is not present, return an empty array.
+	if acceptLanguage == "" {
+		return []string{}
+	}
+
+	// Split the header into language-territory pairs.
+	languages := strings.Split(acceptLanguage, ",")
+
+	// Extract the language code from each language-territory pair.
+	var acceptedLanguages []string
+	for _, lang := range languages {
+		language := strings.Split(lang, ";")[0]
+		acceptedLanguages = append(acceptedLanguages, language)
+	}
+
+	return acceptedLanguages
+}
+
+func isInSlice(value string, slice []string) bool {
+	for _, element := range slice {
+		if element == value {
+			return true
+		}
+	}
+	return false
 }

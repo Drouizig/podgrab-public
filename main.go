@@ -10,13 +10,16 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/BurntSushi/toml"
 	"github.com/akhilrex/podgrab/controllers"
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/service"
+	ginI18n "github.com/gin-contrib/i18n"
 	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
 	"github.com/jasonlvhit/gocron"
 	_ "github.com/joho/godotenv/autoload"
+	"golang.org/x/text/language"
 )
 
 func main() {
@@ -57,7 +60,7 @@ func main() {
 				return ""
 			}
 
-			return raw.Format("Jan 2 2006")
+			return raw.Format("02/01/2006")
 		},
 		"naturalDate": func(raw time.Time) string {
 			return service.NatualTime(time.Now(), raw)
@@ -70,7 +73,7 @@ func main() {
 					latest = item.PubDate
 				}
 			}
-			return latest.Format("Jan 2 2006")
+			return latest.Format("02/01/2006")
 		},
 		"downloadedEpisodes": func(podcastItems []db.PodcastItem) int {
 			count := 0
@@ -130,6 +133,13 @@ func main() {
 		"htmlDecode": func(htmlStr string) string {
 			return html.UnescapeString(htmlStr)
 		},
+		"trans": func(code string, context *gin.Context) string {
+			var message, err = ginI18n.GetMessage(context, code)
+			if err != nil {
+				return code
+			}
+			return message
+		},
 	}
 	tmpl := template.Must(template.New("main").Funcs(funcMap).ParseGlob("client/*"))
 
@@ -137,8 +147,11 @@ func main() {
 	r.SetHTMLTemplate(tmpl)
 
 	pass := os.Getenv("PASSWORD")
+	var langRouter *gin.RouterGroup
 	var router *gin.RouterGroup
 	var adminRouter *gin.RouterGroup
+	var assetsRouter *gin.RouterGroup
+
 	if pass != "" {
 		adminRouter = r.Group("/admin", gin.BasicAuth(gin.Accounts{
 			"podgrab": pass,
@@ -148,18 +161,40 @@ func main() {
 			"podgrab": "podgrab",
 		}))
 	}
-	router = r.Group("/")
+	langRouter = r.Group("/")
+	assetsRouter = r.Group("/")
+	router = r.Group("/:lang")
+
+	router.Use(ginI18n.Localize(
+		ginI18n.WithGetLngHandle(
+			func(context *gin.Context, defaultLng string) string {
+				lng := context.Param("lang")
+				if lng == "" {
+					return defaultLng
+				}
+				return lng
+			},
+		),
+		ginI18n.WithBundle(&ginI18n.BundleCfg{
+			RootPath:         "./translations",
+			AcceptLanguage:   []language.Tag{language.Make("ga"), language.Make("fr"), language.Make("br")},
+			DefaultLanguage:  language.Make("br"),
+			UnmarshalFunc:    toml.Unmarshal,
+			FormatBundleFile: "toml",
+		}),
+	))
 
 	dataPath := os.Getenv("DATA")
 	backupPath := path.Join(os.Getenv("CONFIG"), "backups")
 
-	router.Static("/webassets", "./webassets")
-	router.Static("/assets", dataPath)
+	langRouter.GET("/", controllers.SelectLang)
+	assetsRouter.Static("/webassets", "./webassets")
+	assetsRouter.Static("/assets", dataPath)
 	router.Static(backupPath, backupPath)
 	router.POST("/podcasts", controllers.AddPodcast)
 	router.GET("/podcasts", controllers.GetAllPodcasts)
 	router.GET("/podcasts/:id", controllers.GetPodcastById)
-	router.GET("/podcasts/:id/image", controllers.GetPodcastImageById)
+	assetsRouter.GET("/podcasts/:id/image", controllers.GetPodcastImageById)
 	adminRouter.DELETE("/podcasts/:id", controllers.DeletePodcastById)
 	router.GET("/podcasts/:id/items", controllers.GetPodcastItemsByPodcastId)
 	adminRouter.GET("/podcasts/:id/download", controllers.DownloadAllEpisodesByPodcastId)
@@ -171,7 +206,7 @@ func main() {
 
 	router.GET("/podcastitems", controllers.GetAllPodcastItems)
 	router.GET("/podcastitems/:id", controllers.GetPodcastItemById)
-	router.GET("/podcastitems/:id/image", controllers.GetPodcastItemImageById)
+	assetsRouter.GET("/podcastitems/:id/image", controllers.GetPodcastItemImageById)
 	router.GET("/podcastitems/:id/file", controllers.GetPodcastItemFileById)
 	adminRouter.GET("/podcastitems/:id/markUnplayed", controllers.MarkPodcastItemAsUnplayed)
 	adminRouter.GET("/podcastitems/:id/markPlayed", controllers.MarkPodcastItemAsPlayed)
@@ -192,6 +227,7 @@ func main() {
 	adminRouter.GET("/add", controllers.AddPage)
 	router.GET("/search", controllers.Search)
 	router.GET("/", controllers.HomePage)
+	adminRouter.GET("/", controllers.HomePageAdmin)
 	router.GET("/podcasts/:id/view", controllers.PodcastPage)
 	router.GET("/episodes", controllers.AllEpisodesPage)
 	router.GET("/allTags", controllers.AllTagsPage)

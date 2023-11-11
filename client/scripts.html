@@ -35,7 +35,7 @@
       element.classList.add("long-version");
 
       var more = document.createElement("a");
-      more.textContent = " show more";
+      more.textContent = "{{ trans "show_more" .context }}";
       more.style.cursor = "pointer";
       more.classList.add("link-show-more")
       
@@ -57,7 +57,7 @@
       };
 
       var less = document.createElement("a");
-      less.textContent = " show less";
+      less.textContent = "{{ trans "show_less" .context }}";
       less.style.cursor = "pointer";
       less.classList.add("link-show-less")
       less.onclick = function () {
@@ -87,7 +87,7 @@
   checkUseMore();
 
   function openPlayer(itemIds, podcastId,tagIds) {
-    var url = "/player?";
+    var url = "/{{.lang}}/player?";
     if(itemIds && itemIds.length>0){
       for (const itemId of itemIds) {
         url += "&itemIds=" + itemId;

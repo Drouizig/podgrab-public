@@ -13,6 +13,7 @@ import (
 	"github.com/gin-contrib/location"
 
 	"github.com/akhilrex/podgrab/db"
+	ginI18n "github.com/gin-contrib/i18n"
 	"github.com/gin-gonic/gin"
 )
 
@@ -423,9 +424,17 @@ func AddPodcast(c *gin.Context) {
 
 func GetAllTags(c *gin.Context) {
 	tags, err := db.GetAllTags("")
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	} else {
+		for i, _ := range *tags {
+			var originalLabel = (*tags)[i].Label
+			(*tags)[i].Label, err = ginI18n.GetMessage(c, "tag_"+(*tags)[i].Label)
+			if nil != err {
+				(*tags)[i].Label = originalLabel
+			}
+		}
 		c.JSON(200, tags)
 	}
 

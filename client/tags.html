@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{.title}} - PodGrab</title>
+    <title>{{trans .title .context}} - PodGrab</title>
     {{template "commoncss" .}}
     <style>
       img {
@@ -71,7 +71,7 @@
         </div>
         <div class="columns seven">
           {{range .Podcasts}}
-          <a href="/podcasts/{{.ID}}/view"><img
+          <a href="/{{$.lang}}/podcasts/{{.ID}}/view"><img
             class="podcast-image"
             src="{{.Image}}"
             title="{{.Title}}"
@@ -82,25 +82,12 @@
         </div>
 
         <div class="columns three">
-          <!-- <a
-            class="button button"
-            onclick="deleteTag('{{.ID}}')"
-            title="Delete Tag"
-            ><i class="fas fa-trash"></i
-          ></a> -->
           <a
             class="button button"
             onclick="playTag('{{.ID}}')"
-            title="Lenn holl rannoù ar rummad"
+            title="{{ trans "tags_play_all" $.context }}"
             ><i class="fas fa-play"></i
           ></a>
-          <!-- <a
-          class="button"
-          href="/tags/{{.ID}}/rss"
-          target="_blank"
-          title="Kaout an RSS evit ar rummad-mañ."
-          ><i class="fas fa-rss"></i
-        ></a> -->
         </div>
       </div>
       <hr />
@@ -133,7 +120,7 @@
       </div>
     </div>
 
-    {{template "scripts"}}
+    {{template "scripts".}}
     <script>
      
       function deleteTag(id) {

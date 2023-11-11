@@ -1,4 +1,4 @@
-{{define "navbar"}}
+{{define "navbar_admin"}}
 <style>
     /* Larger than tablet */
     @media (min-width: 750px) {
@@ -20,10 +20,6 @@
     width: 100%; }
   .navbar-list {
     list-style: none;
-    margin-bottom: 0; }
-  .navbar-list-lang {
-    list-style: none;
-    float: right;
     margin-bottom: 0; }
   .navbar-item {
     position: relative;
@@ -145,11 +141,19 @@ div#overlay{
 <div></div>
 <div></div>
   </a>
-  <h1 id="pageTitle">{{ trans .title .context }}</h1>
+  <h1 id="pageTitle">{{ .title }}</h1>
   {{if .podcastId }}
+  <button
+  class="button"
+  title="Download all episode files"
+  onclick="downloadAllEpisodes({{ .podcastId }})"
+>
+  <i class="fas fa-download"></i>
+</button>
+
 <button
 class="button"
-title="{{trans "podcast_play_all" .context}}"
+title="Play all episodes"
 onclick="playPodcast({{ .podcastId }})"
 >
 <i class="fas fa-play"></i>
@@ -167,30 +171,18 @@ onclick="enquePodcast({{ .podcastId }})"
 <nav class="navbar">
     <div class="container">
       <ul class="navbar-list">
-        <li class="navbar-item"><a class="navbar-link" href="/{{.lang}}">{{ trans "nav_home" .context }}</a></li>
-        <li class="navbar-item"><a class="navbar-link" href="/{{.lang}}/episodes">{{ trans "nav_episodes" .context }}</a></li>
-        <li class="navbar-item"><a class="navbar-link" href="/{{.lang}}/player">{{ trans "nav_player" .context }}</a></li>
-        <li class="navbar-item"><a class="navbar-link" href="/{{.lang}}/allTags">{{ trans "nav_tags" .context }}</a></li>
-      </ul>
-      <ul class="navbar-list-lang">
-        <li class="navbar-item"><a class="navbar-link" href="/br">Brezhoneg</a></li>
-        <li class="navbar-item"><a class="navbar-link" href="/ga">Galo</a></li>
-        <li class="navbar-item"><a class="navbar-link" href="/fr">Français</a></li>
+        <li class="navbar-item"><a class="navbar-link" href="/admin">Degemer admin</a></li>
+        <li class="navbar-item"><a class="navbar-link" href="/admin/add">Add Podcast</a></li>
+        <li class="navbar-item"><a class="navbar-link" href="/admin/settings">Settings</a></li>
       </ul>
     </div>
   </nav>
 
   <div class="drawer" id="sideDrawer">
     <ul>
-      <li><a href="/{{.lang}}">{{ trans "nav_home" .context }}</a></li>
-      <li><a href="/{{.lang}}/episodes">{{ trans "nav_episodes" .context }}</a></li>
-      <li><a href="/{{.lang}}/player">{{ trans "nav_player" .context }}</a></li>
-      <li><a href="/{{.lang}}/allTags">{{ trans "nav_tags" .context }}</a></li>
-    </ul>
-    <ul class="navbar-list-lang">
-      <li><a href="/br">Brezhoneg</a></li>
-      <li><a href="/ga">Galo</a></li>
-      <li><a href="/fr">Français</a></li>
+      <li><a  href="/admin">Degemer admin</a></li>
+      <li><a href="/admin/add">Add Podcast</a></li>
+      <li><a  href="/admin/settings">Settings</a></li>
     </ul>
     <div id="closeDrawer" onclick="toggleMenu()" >
       <div class="bar1"></div>  

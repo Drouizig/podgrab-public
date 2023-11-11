@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{.title}} - PodGrab</title>
+    <title>{{trans .title .context}} - PodGrab</title>
     {{template "commoncss" .}}
     <style>
       img {
@@ -85,7 +85,7 @@
             </div>
             <div class="columns three">
               <small title="{{ formatDate .PubDate }}"
-                >{{ naturalDate .PubDate }}</small
+                >{{ formatDate .PubDate }}</small
               >
             </div>
             <div class="columns one">
@@ -95,52 +95,19 @@
 
           <p class="useMore">{{ .Summary | htmlDecode }}</p>
 
-          {{if .IsPlayed }}
-          <a
-            class="button button"
-            title="Mark as not listened"
-            onclick="changePlayedStatus('{{.ID}}',{{ not .IsPlayed }})"
-            ><i class="fas fa-envelope"></i
-          ></a>
-          {{ else }}
-          <a
-            class="button button"
-            title="Mark as listened"
-            onclick="changePlayedStatus('{{.ID}}',{{ not .IsPlayed }})"
-            ><i class="fas fa-envelope-open"></i
-          ></a>
-          {{ end }}
-
-          {{if isDateNull .BookmarkDate }}
-          <a
-            class="button button"
-            title="Bookmark Episode"
-            onclick="changeBookmarkStatus('{{.ID}}',true)"
-            ><i class="far fa-bookmark"></i
-          ></a>
-          {{ else }}
-          <a
-            class="button button"
-            title="Remove Bookmark"
-            onclick="changeBookmarkStatus('{{.ID}}',false)"
-            ><i class="fas fa-bookmark"></i
-          ></a>
-
-          {{ end }}
-
           {{if .FileURL}}
           <a
             class="button"
             href="{{.FileURL}}"
             download
-            title="Pellgargañ ar restr"
+            title="{{ trans "podcast_download_file" $.context }}"
             ><i class="fas fa-download"></i
           ></a>
           {{end }}
           <a
           class="button button"
           onclick="openPlayer(['{{.ID}}'])"
-          title="Play Episode"
+          title="{{ trans "podcast_play_episode" $.context }}"
           ><i class="fas fa-play"></i
         ></a>
         <a
@@ -168,14 +135,14 @@
           <a
             href="?page=1"
             class="button"
-            >First</a
+            >{{ trans "page_first" .context }}</a
           >
           {{end}}
           {{if .previousPage }}
           <a
             href="?page={{.previousPage}}"
             class="button"
-            >Previous</a
+            >{{ trans "page_previous" .context }}</a
           >
           {{end}}
 
@@ -190,7 +157,7 @@
           <a
             href="?page={{.nextPage}}"
             class="button"
-            >Next</a
+            >{{ trans "page_next" .context }}</a
           >
           {{end}}
           {{if gt .totalPages .page }}
@@ -198,14 +165,14 @@
           <a
             href="?page={{.totalPages}}"
             class="button"
-            >Last</a
+            >{{ trans "page_last" .context }}</a
           >
           {{end}}
         </div>
       </div>
     </div>
 
-    {{template "scripts"}}
+    {{template "scripts" .}}
     <script>
       function downloadToDisk(id) {
         axios

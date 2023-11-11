@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{.title}} - PodGrab</title>
+    <title>{{ trans .title .context}} - PodGrab</title>
     {{template "commoncss" .}}
     <link rel="stylesheet" href="/webassets/vue-multiselect.min.css">
 
@@ -171,13 +171,13 @@
           <a v-if="filter.previousPage"
            @click=" goToPage(1)"
             class="button"
-            >First</a
+            >{{ trans "page_first" .context }}</a
           >
           
           <a v-if="filter.previousPage"
            @click="goToPreviousPage()"
             class="button"
-            >Previous</a 
+            >{{ trans "page_previous" .context }}</a 
           >
          
           
@@ -194,7 +194,7 @@
           v-if="filter.nextPage"
             class="button"
             @click="goToNextPage()"
-            >Next</a
+            >{{ trans "page_next" .context }}</a
           >
     
         
@@ -202,14 +202,14 @@
           v-if="filter.totalPages>filter.page"
             class="button"
             @click=" goToPage(filter.totalPages)"
-            >Last</a
+            >{{ trans "page_last" .context }}</a
           >
         </div>
       </div>
    
   </div>
 
-    {{template "scripts"}}
+    {{template "scripts".}}
     <script src="/webassets/luxon.min.js"></script>
     <script src="/webassets/vue-multiselect.min.js"></script>
 
@@ -331,17 +331,6 @@ var app = new Vue({
               }
             }
 
-            for(var i=0;i<this.downloadStatusOptions.length;i++){
-              if(this.downloadStatusOptions[i].Value===this.filter.isDownloaded.toString()){
-                this.selectedDownloadStatus=this.downloadStatusOptions[i]
-              }
-            }
-
-            for(var i=0;i<this.playedStatusOptions.length;i++){
-              if(this.playedStatusOptions[i].Value===this.filter.isPlayed.toString()){
-                this.selectedPlayedStatus=this.playedStatusOptions[i]
-              }
-            }
             this.filter.page=1;
           this.getData()
 
@@ -457,8 +446,7 @@ var app = new Vue({
             this.filter.q="";
             this.selectedPodcasts=[];
             this.selectedTags=[];
-            this.selectedDownloadStatus=this.downloadStatusOptions[0];
-            this.selectedPlayedStatus=this.playedStatusOptions[0];
+
           },
           removeStartingSlash(url){
             if(url[0]==='/'){
@@ -472,13 +460,13 @@ var app = new Vue({
           getData(){
             var self=this;
             axios
-              .get("/podcastitems",{params:this.filter})
+              .get("/{{.lang}}/podcastitems",{params:this.filter})
               .then(function (response) {
                 self.podcastItems= response.data.podcastItems;
                 self.filter=response.data.filter;
                 self.saveFilter(self.filter);
                 self.updateUrl();
-                setPageTitle("Rannoù ("+self.filter.totalCount+")")
+                setPageTitle("{{ trans "episodes_title_alt" .context}} ("+self.filter.totalCount+")")
               })
               .catch(function (error) {
                 if (error.response && error.response.data && error.response.data.message) {
