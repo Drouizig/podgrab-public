@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.17
+ARG GO_VERSION=1.20
 
 FROM golang:${GO_VERSION}-alpine AS builder
 
@@ -33,6 +33,7 @@ RUN chmod 777 /config; \
 WORKDIR /api
 COPY --from=builder /api/app .
 COPY client ./client
+COPY translations ./translations
 COPY webassets ./webassets
 
 EXPOSE 8080
