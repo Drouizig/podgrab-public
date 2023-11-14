@@ -217,7 +217,7 @@ func main() {
 	router.GET("/podcastitems", controllers.GetAllPodcastItems)
 	router.GET("/podcastitems/:id", controllers.GetPodcastItemById)
 	assetsRouter.GET("/podcastitems/:id/image", controllers.GetPodcastItemImageById)
-	router.GET("/podcastitems/:id/file", controllers.GetPodcastItemFileById)
+	assetsRouter.GET("/podcastitems/:id/file", controllers.GetPodcastItemFileById)
 	adminRouter.GET("/podcastitems/:id/markUnplayed", controllers.MarkPodcastItemAsUnplayed)
 	adminRouter.GET("/podcastitems/:id/markPlayed", controllers.MarkPodcastItemAsPlayed)
 	adminRouter.GET("/podcastitems/:id/bookmark", controllers.BookmarkPodcastItem)
