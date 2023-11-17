@@ -12,10 +12,23 @@
 
 
   function decode(html){
-          var txt = document.createElement("textarea");
-          txt.innerHTML = html;
-          return txt.value;
+    var doc = new DOMParser().parseFromString(html, "text/html");
+    return doc.documentElement.textContent;
   }
+  function copyURL(url) {
+            const input = document.createElement('input');
+            input.value = url;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+              document.getElementById("fadeAlert").classList.remove("fade-out");
+
+            setTimeout(function() {
+              document.getElementById("fadeAlert").classList.add("fade-out");
+            }, 3000);
+
+      }
   function checkUseMore() {
     var elements = document.getElementsByClassName("useMore");
 

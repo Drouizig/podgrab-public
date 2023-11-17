@@ -57,6 +57,23 @@
   display: none;
 }
 
+.alert {  
+        position: fixed;
+        top: 50px;
+        left: 40%;
+        padding: 15px;
+        background-color: #d7f8d9;
+        color: #1c722f;
+        border: 1px solid #c6f5c8;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        opacity: 1;
+        transition: opacity 1s ease-in-out;
+      }
+
+      .fade-out {
+        opacity: 0;
+      }
 @media (max-width: 750px) {
 
 .drawer {
@@ -136,6 +153,7 @@ div#overlay{
   -webkit-transform: rotate(45deg) translate(1px, 1px) ;
   transform: rotate(45deg) translate(1px, 1px) ;
 }
+
 }
 
 </style>
@@ -147,6 +165,17 @@ div#overlay{
   </a>
   <h1 id="pageTitle">{{ trans .title .context }}</h1>
   {{if .podcastId }}
+  <h4>{{.podcastAuthor}}</h4>
+
+  <a
+  class="button"
+  title="{{ trans "podcast_rss" .context }}"
+  href="#"
+  onclick="copyURL('{{ .podcastURL }}')"
+>
+  <i class="fas fa-rss"></i>
+</a>
+
 <button
 class="button"
 title="{{trans "podcast_play_all" .context}}"
@@ -200,6 +229,9 @@ onclick="enquePodcast({{ .podcastId }})"
   </div>
   <div id="overlay" onclick="toggleMenu()"></div>
 
+  <div class="alert fade-out" id="fadeAlert">
+    {{ trans "copy_alert" .context}}
+  </div>
   <script>
 
     function setPageTitle(content){

@@ -43,6 +43,7 @@ footer_notice_podgrab="Basé sur"
 footer_notice_drouizig="Modifié par"
 footer_notice_fedi="Hebergé par"
 footer_notice_rest=" "
+copy_alert="Lien copié dans le presse papier."
 
 tag_brezhoneg = "Breton"
 tag_gallaoueg = "Gallo"

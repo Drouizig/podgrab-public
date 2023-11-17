@@ -400,7 +400,7 @@
           getAllTags(){
             var self=this;
              axios
-              .get("/tags")
+              .get("/br/tags")
               .then(function (response) {
                 self.allTags=response.data;
                 self.setAvailableTags();

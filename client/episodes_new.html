@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ trans .title .context}} - PodGrab</title>
+    <title>{{ trans .title .context}} - {{ trans "homepage_title" .context }}</title>
     {{template "commoncss" .}}
     <link rel="stylesheet" href="/webassets/vue-multiselect.min.css">
 
@@ -129,7 +129,8 @@
                    style="color: green"
                    class="fas fa-check-circle"
                  ></i>
-                 ${item.Title} <template v-if="item.Podcast && item.Podcast.Title"> // ${item.Podcast.Title}</template>
+                 ${item.Title}
+                 <template v-if="item.Podcast && item.Podcast.Title"> <p><a :href="'/{{.lang}}/podcasts/'+item.Podcast.ID+'/view'"> ${item.Podcast.Title}</a></p></template>
                </h4>
             </div>
             <div class="columns three">

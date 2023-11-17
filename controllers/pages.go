@@ -138,6 +138,8 @@ func PodcastPage(c *gin.Context) {
 					"context":        c,
 					"lang":           c.Param("lang"),
 					"title":          podcast.Title,
+					"podcastURL":     podcast.URL,
+					"podcastAuthor":  podcast.Author,
 					"podcastItems":   podcast.PodcastItems[from:to],
 					"setting":        setting,
 					"page":           page,

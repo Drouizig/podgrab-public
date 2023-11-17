@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PodGrabzh</title>
+    <title>{{ trans .title .context }}</title>
     {{template "commoncss" .}}
     <style>
       .button-delete {
@@ -18,13 +18,19 @@
       .podcasts .button-img img {
         vertical-align: middle;
       }
-      img {
+      .imageContainer {
         display: none;
       }
+        .imageMobile img {
+          max-height: 70px;;
+        }
       /* Larger than tablet */
       @media (min-width: 750px) {
-        img {
+        .imageContainer {
           display: block;
+        }
+        .imageMobile {
+          display: none;
         }
       }
       [v-cloak] {
@@ -178,12 +184,22 @@
               onerror="onImageError(this)"
               class="u-full-width"
               :src="getPodcastImage(podcast)"
-             
-              v-bind:alt="podcast.Title"
+              alt=""
             />
           </a>
           </div>
           <div class="columns" v-bind:class="{ten:layout=='list', twelve:layout=='grid',paused:podcast.IsPaused}">
+            <div class="row">
+              <div class="two columns">
+            <div class="imageMobile">
+              <img
+                onerror="onImageError(this)"
+                :src="getPodcastImage(podcast)"
+                alt=""
+            />  
+            </div>
+          </div>
+          <div class="ten columns">
             <div class="titleContainer">
             <a style="text-decoration: none" :href="'/{{.lang}}/podcasts/'+podcast.ID+'/view'">
               <h3 v-if="layout=='list'">${podcast.Title}</h3>
@@ -191,8 +207,10 @@
              
               </a>
             </div>
+          </div>
+          </div>
            <div class="contentContainer">
-            <p class="useMore">${podcast.Summary}</p></div>
+            <p class="useMore">${decode(podcast.Summary)}</p></div>
             <div class="contentContainer">
              <p class="autho">${podcast.Author}</p></div>
 
@@ -226,6 +244,7 @@
               class="button"
               title="{{ trans "podcast_rss" .context }}"
               :href="podcast.URL"
+              @click.prevent="copyURL"
             >
               <i class="fas fa-rss"></i>
             </a>
@@ -626,6 +645,29 @@
               .then(function (response) {
                 self.allTags=response.data;
               })
+          },
+          copyURL(event) {
+            var a = event.target;
+            if(a.tagName === 'I') {
+              a = a.parentNode;
+            }
+            var url = a.getAttribute('href');
+            const input = document.createElement('input');
+            input.value = url;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+              document.getElementById("fadeAlert").classList.remove("fade-out");
+
+            setTimeout(function() {
+              document.getElementById("fadeAlert").classList.add("fade-out");
+            }, 3000);
+
+          },
+
+          decode(html){
+            return decode(html);
           },
         },
         mounted(){
