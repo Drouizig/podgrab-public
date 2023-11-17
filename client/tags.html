@@ -67,7 +67,7 @@
 <div id="tag-{{.ID}}">
       <div class="podcasts row tag">
         <div class="columns two">
-          <h4>{{.Label}}</h4>
+          <h4>{{ trans (printf "tag_%s" .Label) $.context}}</h4>
         </div>
         <div class="columns seven">
           {{range .Podcasts}}
