@@ -211,7 +211,7 @@ func GetAllPodcastItems(c *gin.Context) {
 	if podcastItems, totalCount, err := db.GetPaginatedPodcastItemsNew(filter); err == nil {
 		filter.SetCounts(totalCount)
 		toReturn := gin.H{
-			"podcastItems": podcastItems,
+			"podcastItems": PodcastsItemsToDto(*podcastItems),
 			"filter":       &filter,
 		}
 		c.JSON(http.StatusOK, toReturn)

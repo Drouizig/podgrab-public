@@ -43,16 +43,38 @@
 </style>
 
 <style>
-@media (min-width: 1400px){
-.container {
-    max-width: 1320px;
-}
-}
-@media (min-width: 1200px){
-.container {
-    max-width: 1140px;
-}
-}
+  @media (min-width: 1400px){
+    .container {
+        max-width: 1320px;
+    }
+  }
+  @media (min-width: 1200px){
+    .container {
+        max-width: 1140px;
+    }
+  }
+
+  .alert {  
+    position: fixed;
+    top: 50px;
+    left: 40%;
+    padding: 15px;
+    background-color: #d7f8d9;
+    color: #1c722f;
+    border: 1px solid #c6f5c8;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    opacity: 1;
+    transition: opacity 1s ease-in;
+  }
+
+  .fade-out {
+    opacity: 0;
+  }
+  .link-show-more, .link-show-less {
+    display: block;
+  }
+
   .header {
     margin-top: 6rem;
     text-align: center;

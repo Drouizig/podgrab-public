@@ -141,8 +141,23 @@
               <small> ${getFormattedDuration(item.Duration)}</small>
             </div>
           </div>
-          <p class="useMore">${decode(item.Summary) }</p>
-      
+          <p :id="'episode-' + item.ID" class="useMore" v-html="truncate(item.Summary)"></p>
+          <a 
+            style="cursor: pointer;"
+            v-if="shouldTruncate(item.Summary)"
+            class="link-show-more"
+            @click="showMore(item.ID, item.Summary, $event)"
+            >
+            <i class="fa fa-chevron-down"></i> {{ trans "show_more" .context }}
+          </a>          
+          <a 
+          style="cursor: pointer;display: none"
+          v-if="shouldTruncate(item.Summary)"
+          class="link-show-less"
+          @click="showLess(item.ID, item.Summary, $event)"
+          >
+          <i class="fa fa-chevron-up"></i> {{ trans "show_less" .context }}
+        </a>
         <a
           v-if="item.FileURL"
           class="button"
@@ -217,7 +232,6 @@
 
 <script>
 Vue.component('vue-multiselect', window.VueMultiselect.default)
-
 var app = new Vue({
         delimiters: ["${", "}"],
         el: "#app",
@@ -334,7 +348,6 @@ var app = new Vue({
 
             this.filter.page=1;
           this.getData()
-
 
         },
         methods:{
@@ -455,8 +468,25 @@ var app = new Vue({
             }
             return "/"+url
           },
-          decode(html){
-            return decode(html);
+          truncate(html){
+            return html.length > 300 ? html.slice(0, 300)+ '...' : html;
+          },
+          shouldTruncate(html){
+            return html.length > 300;
+          },
+          showMore(id, text, event) {
+            var element = document.getElementById('episode-'+id);
+            element.innerHTML = text
+            element.classList.add('expanded');
+            event.target.style.display = 'none';
+            event.target.parentNode.getElementsByClassName('link-show-less')[0].style.display = 'block';
+          },
+          showLess(id, text, event) {
+            var element = document.getElementById('episode-'+id);
+            element.innerHTML = this.truncate(text)
+            element.classList.remove('expanded');
+            event.target.style.display = 'none'
+            event.target.parentNode.getElementsByClassName('link-show-more')[0].style.display = 'block';
           },
           getData(){
             var self=this;

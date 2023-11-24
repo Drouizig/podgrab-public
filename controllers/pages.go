@@ -68,6 +68,9 @@ func HomePage(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/br")
 	}
 	podcasts := service.GetAllPodcasts("")
+
+	var podcastsDTO = PodcastsToDTO(podcasts)
+
 	tags, _ := db.GetAllTags("")
 	tagTranslations := make(map[string]string)
 	for _, tag := range *tags {
@@ -86,7 +89,7 @@ func HomePage(c *gin.Context) {
 			"title":           "homepage_title",
 			"context":         c,
 			"lang":            c.Param("lang"),
-			"podcasts":        podcasts,
+			"podcasts":        podcastsDTO,
 			"setting":         setting,
 		},
 	)
@@ -140,7 +143,7 @@ func PodcastPage(c *gin.Context) {
 					"title":          podcast.Title,
 					"podcastURL":     podcast.URL,
 					"podcastAuthor":  podcast.Author,
-					"podcastItems":   podcast.PodcastItems[from:to],
+					"podcastItems":   PodcastsItemsToDto(podcast.PodcastItems[from:to]),
 					"setting":        setting,
 					"page":           page,
 					"count":          count,

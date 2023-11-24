@@ -22,11 +22,16 @@ func GetPodcastsByURLList(urls []string, podcasts *[]Podcast) error {
 	result := DB.Preload(clause.Associations).Where("url in ?", urls).First(&podcasts)
 	return result.Error
 }
-func GetAllPodcasts(podcasts *[]Podcast, sorting string) error {
+func GetAllPodcasts(podcasts *[]Podcast, sorting string, preloadTags bool) error {
 	if sorting == "" {
 		sorting = "last_episode desc"
 	}
-	result := DB.Preload("Tags").Order(sorting).Find(&podcasts)
+	var result *gorm.DB
+	if preloadTags {
+		result = DB.Preload("Tags").Order(sorting).Find(&podcasts)
+	} else {
+		result = DB.Order(sorting).Find(&podcasts)
+	}
 	return result.Error
 }
 func GetAllPodcastItems(podcasts *[]PodcastItem) error {

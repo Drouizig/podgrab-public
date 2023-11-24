@@ -86,8 +86,7 @@ func GetTagsByIds(ids []string) *[]db.Tag {
 }
 func GetAllPodcasts(sorting string) *[]db.Podcast {
 	var podcasts []db.Podcast
-	fmt.Println(sorting)
-	db.GetAllPodcasts(&podcasts, sorting)
+	db.GetAllPodcasts(&podcasts, sorting, true)
 
 	stats, _ := db.GetPodcastEpisodeStats()
 
@@ -227,9 +226,14 @@ func AddPodcast(url string) (db.Podcast, error) {
 			return db.Podcast{}, err
 		}
 
+		summary := data.Channel.Summary
+		if summary == "" {
+			summary = data.Channel.Description
+		}
+
 		podcast := db.Podcast{
 			Title:   data.Channel.Title,
-			Summary: data.Channel.Summary,
+			Summary: summary,
 			Author:  data.Channel.Author,
 			Image:   data.Channel.Image.URL,
 			URL:     url,
@@ -357,11 +361,23 @@ func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 			itemsAdded[podcastItem.ID] = podcastItem.FileURL
 		}
 	}
+	UpdatePodcastInfo(podcast, &data)
 	if (latestDate != time.Time{}) {
 		db.UpdateLastEpisodeDateForPodcast(podcast.ID, latestDate)
 	}
 	//go updateSizeFromUrl(itemsAdded)
 	return err
+}
+
+func UpdatePodcastInfo(podcast *db.Podcast, xmlData *model.PodcastData) {
+	summary := xmlData.Channel.Summary
+	if summary == "" {
+		summary = xmlData.Channel.Description
+	}
+	if summary != podcast.Summary {
+		podcast.Summary = summary
+		db.UpdatePodcast(podcast)
+	}
 }
 
 func updateSizeFromUrl(itemUrlMap map[string]string) {
@@ -625,7 +641,7 @@ func DownloadSingleEpisode(podcastItemId string) error {
 
 func RefreshEpisodes() error {
 	var data []db.Podcast
-	err := db.GetAllPodcasts(&data, "")
+	err := db.GetAllPodcasts(&data, "", false)
 
 	if err != nil {
 		return err
@@ -633,14 +649,10 @@ func RefreshEpisodes() error {
 	for _, item := range data {
 		isNewPodcast := item.LastEpisode == nil
 		if isNewPodcast {
-			fmt.Println(item.Title)
 			db.ForceSetLastEpisodeDate(item.ID)
 		}
 		AddPodcastItems(&item, isNewPodcast)
 	}
-	//	setting := db.GetOrCreateSetting()
-
-	go DownloadMissingEpisodes()
 
 	return nil
 }

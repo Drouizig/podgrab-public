@@ -32,6 +32,9 @@
         .imageMobile {
           display: none;
         }
+        .title.columns {
+          margin-left: 0;
+        }
       }
       [v-cloak] {
         display: none;
@@ -199,7 +202,7 @@
             />  
             </div>
           </div>
-          <div class="ten columns">
+          <div class="ten columns title">
             <div class="titleContainer">
             <a style="text-decoration: none" :href="'/{{.lang}}/podcasts/'+podcast.ID+'/view'">
               <h3 v-if="layout=='list'">${podcast.Title}</h3>
@@ -210,9 +213,9 @@
           </div>
           </div>
            <div class="contentContainer">
-            <p class="useMore">${decode(podcast.Summary)}</p></div>
+            <p class="author">${podcast.Author}</p>
+            <p class="useMore" v-html="podcast.Summary"></p>
             <div class="contentContainer">
-             <p class="autho">${podcast.Author}</p></div>
 
             <div class="row">
               <div class="columns" v-bind:class="{two:layout=='list', twelve:layout=='grid'}">
@@ -220,9 +223,7 @@
                 <span v-if="podcast.LastEpisode">${getFormattedLastEpisodeDate(podcast)}</span> 
               </div>
 
-              <div
-              class="columns"  v-bind:class="{two:layout=='list', twelve:layout=='grid'}"
-            >
+              <div class="columns"  v-bind:class="{two:layout=='list', twelve:layout=='grid'}">
               ${podcast.AllEpisodesCount}
               {{ trans "podcast_episodes" .context }}
             </div>
@@ -700,7 +701,6 @@
           
           this.$nextTick(function () {
 
-          checkUseMore();
           tippy(".deletePodcast",{
             allowHTML: true,
             content(reference) {

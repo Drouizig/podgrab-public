@@ -453,6 +453,7 @@
 
     </script>
     <script>
+      console.log('alloooo');
         var app = new Vue({
         delimiters: ["${", "}"],
         el: "#app",
@@ -468,6 +469,8 @@
             }
         },
         created(){
+          console.log('vuuue');  
+          window.checkUseMore();
           this.podcasts=this.allPodcasts;
           const self=this;
          this.socket= getWebsocketConnection(function(event){
@@ -673,7 +676,6 @@
           
           this.$nextTick(function () {
 
-          checkUseMore();
           tippy(".deletePodcast",{
             allowHTML: true,
             content(reference) {
