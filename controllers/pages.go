@@ -288,14 +288,14 @@ func BackupsPage(c *gin.Context) {
 
 }
 
-func getSortOptions() interface{} {
+func getSortOptions(c *gin.Context) interface{} {
 	return []struct {
 		Label, Value string
 	}{
-		{"Embann (kresk)", "release_asc"},
-		{"Embann (digresk)", "release_desc"},
-		{"Padelezh (kresk)", "duration_asc"},
-		{"Padelezh (digresk)", "duration_desc"},
+		{ginI18n.MustGetMessage(c, "episodes_filters_publication_asc"), "release_asc"},
+		{ginI18n.MustGetMessage(c, "episodes_filters_publication_desc"), "release_desc"},
+		{ginI18n.MustGetMessage(c, "episodes_filters_duration_asc"), "duration_asc"},
+		{ginI18n.MustGetMessage(c, "episodes_filters_duration_desc"), "duration_desc"},
 	}
 }
 func AllEpisodesPage(c *gin.Context) {
@@ -316,7 +316,7 @@ func AllEpisodesPage(c *gin.Context) {
 		"filter":       filter,
 		"podcasts":     podcasts,
 		"tags":         tags,
-		"sortOptions":  getSortOptions(),
+		"sortOptions":  getSortOptions(c),
 	}
 	c.HTML(http.StatusOK, "episodes_new.html", toReturn)
 

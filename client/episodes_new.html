@@ -70,12 +70,12 @@
       <div id="app" v-cloak>
 
   <button @click="toggleFilters()" class="u-full-width">
-    <span  v-show="!showFilters">Diskouez ar siloù</span>
-    <span  v-show="showFilters">Kuzhat ar siloù</span>
+    <span  v-show="!showFilters">{{ trans "episodes_show_filters" .context}}</span>
+    <span  v-show="showFilters">{{ trans "episodes_hide_filters" .context}}</span>
   </button>
     <form @submit.prevent="submitFilters()" v-show="showFilters">
       <div class="row">
-         <input class="columns five" type="search" @input="searchQueryUpated()" v-model="filter.q" placeholder="Klask">
+         <input class="columns five" type="search" @input="searchQueryUpated()" v-model="filter.q" placeholder="{{ trans "episodes_search" .context}}">
     <div class="columns three">    <vue-multiselect v-model="selectedSorting" :options="sortOptions" :searchable="false"
        :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
        placeholder="Sort By" label="Label" track-by="Value" :preselect-first="true">
@@ -89,17 +89,17 @@
     <div class="row">
       <vue-multiselect class="columns three" v-model="selectedPodcasts" :options="podcasts"  :show-labels="false"
       :multiple="true" :close-on-select="false" :clear-on-select="false" 
-      :preserve-search="true" placeholder="Podksignadoù" label="Title" track-by="ID" :preselect-first="false">
+      :preserve-search="true" placeholder="{{ trans "episodes_filters_podcasts" .context}}" label="Title" track-by="ID" :preselect-first="false">
         <template slot="selection" slot-scope="{ values, search, isOpen }">
           <span class="multiselect__single" v-if="values.length && !isOpen">${ values.length } options selected</span>
         </template>
       </vue-multiselect>
-      <vue-multiselect class="columns three" v-model="selectedTags"  :show-labels="false" :options="tags" :multiple="true" :close-on-select="false" :clear-on-select="false" :preserve-search="true" placeholder="Rummadoù" label="Label" track-by="ID" :preselect-first="false">
+      <vue-multiselect class="columns three" v-model="selectedTags"  :show-labels="false" :options="tags" :multiple="true" :close-on-select="false" :clear-on-select="false" :preserve-search="true" placeholder="{{ trans "episodes_filters_tags" .context}}" label="Label" track-by="ID" :preselect-first="false">
         <template slot="selection" slot-scope="{ values, search, isOpen }"><span class="multiselect__single" v-if="values.length && !isOpen">${ values.length } options selected</span></template>
       </vue-multiselect>
        <div class="columns three">
-        <a title="Lenn ar rannoù er bajenn-mañ" v-if="podcastItems.length" class="button" @click="playPage()"><i class="fas fa-play"></i></a>
-        <a title="Adderaouekaat ar siloù" class="button" @click="resetFilters()"><i class="fas fa-undo"></i></a>
+        <a title="{{ trans "episodes_play" .context}}" v-if="podcastItems.length" class="button" @click="playPage()"><i class="fas fa-play"></i></a>
+        <a title="{{ trans "episodes_filters_reset" .context}}" class="button" @click="resetFilters()"><i class="fas fa-undo"></i></a>
        
       </div>
       
