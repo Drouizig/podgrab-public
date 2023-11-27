@@ -6,8 +6,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"image"
-	"image/jpeg"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -22,7 +20,6 @@ import (
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/internal/sanitize"
 	stringy "github.com/gobeam/stringy"
-	"github.com/nfnt/resize"
 )
 
 func Download(link string, episodeTitle string, podcastName string, prefix string) (string, error) {
@@ -106,10 +103,26 @@ func CreateNfoFile(podcast *db.Podcast) error {
 	return ioutil.WriteFile(finalPath, []byte(toPersist), 0644)
 }
 
+func GetReducedImageURL(urlString string) string {
+	u, err := url.Parse(urlString)
+	if err != nil {
+		return urlString
+	}
+
+	q := u.Query()
+	q.Set("width", "300")
+	q.Set("height", "300")
+
+	u.RawQuery = q.Encode()
+
+	return u.String()
+}
+
 func DownloadPodcastCoverImage(link string, podcastName string) (string, error) {
 	if link == "" {
 		return "", errors.New("Download path empty")
 	}
+	link = GetReducedImageURL(link)
 	client := httpClient()
 	req, err := getRequest(link)
 	if err != nil {
@@ -127,7 +140,10 @@ func DownloadPodcastCoverImage(link string, podcastName string) (string, error) 
 	folder := createDataFolderIfNotExists(podcastName)
 
 	finalPath := path.Join(folder, fileName)
-	os.Remove(finalPath)
+
+	if _, err := os.Stat(finalPath); !os.IsNotExist(err) {
+		os.Remove(finalPath)
+	}
 	file, err := os.Create(finalPath)
 	if err != nil {
 		Logger.Errorw("Error creating file"+link, err)
@@ -135,24 +151,11 @@ func DownloadPodcastCoverImage(link string, podcastName string) (string, error) 
 	}
 	defer resp.Body.Close()
 
-	// Decode the original image
-	img, _, err := image.Decode(resp.Body)
-	if err != nil {
-		Logger.Errorw("Error decoding image: "+link, err)
-		return "", err
+	_, erra := io.Copy(file, resp.Body)
+	if erra != nil {
+		Logger.Errorw("Error saving file"+link, err)
+		return "", erra
 	}
-
-	// Resize the image
-	resizedImg := resize.Resize(300, 300, img, resize.Lanczos3)
-
-	// Encode and save the resized image
-	err = jpeg.Encode(file, resizedImg, nil)
-
-	if err != nil {
-		Logger.Errorw("Error encoding and saving resized image: "+link, err)
-		return "", err
-	}
-
 	defer file.Close()
 	changeOwnership(finalPath)
 	return finalPath, nil

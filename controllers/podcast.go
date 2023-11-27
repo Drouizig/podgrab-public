@@ -285,19 +285,8 @@ func GetPodcastImageById(c *gin.Context) {
 			localPath := service.GetPodcastLocalImagePath(podcast.Image, podcast.Title)
 			if _, err = os.Stat(localPath); os.IsNotExist(err) {
 				// If the width an height are in the URL, reducs it to 300px (not 3000 like lumy does)
-				u, err := url.Parse(podcast.Image)
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse URL"})
-					return
-				}
 
-				q := u.Query()
-				q.Set("width", "300")
-				q.Set("height", "300")
-
-				u.RawQuery = q.Encode()
-
-				c.Redirect(302, u.String())
+				c.Redirect(302, service.GetReducedImageURL(podcast.Image))
 			} else {
 				c.File(localPath)
 			}
