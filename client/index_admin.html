@@ -211,6 +211,14 @@
               
             </div>
             <div class="columns"   v-bind:class="{four:layout=='list', twelve:layout=='grid'}">
+              
+              <button
+                class="button"
+                title="Delete only episode files"
+                @click="refreshPodcast(podcast.ID)"
+              >
+                <i class="fas fa-sync"></i>
+              </button>
               <button
                 class="button button-delete deletePodcast"
                 :data-id="podcast.ID"
@@ -636,6 +644,31 @@
               this.podcasts.splice(index,1);
           });},
           deletePodcastEpisodes(id){ deletePodcastEpisodes(id)},
+          refreshPodcast(id){ 
+            url=`/admin/podcasts/${id}/refresh`;
+            axios
+              .get(url)
+              .then(function (response) {
+                Vue.toasted.show(response.data.message, {
+                    theme: "bubble",
+                    type: "success",
+                    position: "top-right",
+                    duration: 5000,
+                  });
+              })
+              .catch(function (error) {
+                if (error.response && error.response.data && error.response.data.message) {
+                  Vue.toasted.show(error.response.data.message, {
+                    theme: "bubble",
+                    type: "error",
+                    position: "top-right",
+                    duration: 5000,
+                  });
+                }
+              })
+
+
+          },
           playPodcast(id){openPlayer("",id)},
           getAllTags(){
             var self=this;

@@ -6,6 +6,8 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -20,6 +22,7 @@ import (
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/internal/sanitize"
 	stringy "github.com/gobeam/stringy"
+	"github.com/nfnt/resize"
 )
 
 func Download(link string, episodeTitle string, podcastName string, prefix string) (string, error) {
@@ -124,24 +127,33 @@ func DownloadPodcastCoverImage(link string, podcastName string) (string, error) 
 	folder := createDataFolderIfNotExists(podcastName)
 
 	finalPath := path.Join(folder, fileName)
-	if _, err := os.Stat(finalPath); !os.IsNotExist(err) {
-		changeOwnership(finalPath)
-		return finalPath, nil
-	}
-
+	os.Remove(finalPath)
 	file, err := os.Create(finalPath)
 	if err != nil {
 		Logger.Errorw("Error creating file"+link, err)
 		return "", err
 	}
 	defer resp.Body.Close()
-	_, erra := io.Copy(file, resp.Body)
-	//fmt.Println(size)
-	defer file.Close()
-	if erra != nil {
-		Logger.Errorw("Error saving file"+link, err)
-		return "", erra
+
+	// Decode the original image
+	img, _, err := image.Decode(resp.Body)
+	if err != nil {
+		Logger.Errorw("Error decoding image: "+link, err)
+		return "", err
 	}
+
+	// Resize the image
+	resizedImg := resize.Resize(300, 300, img, resize.Lanczos3)
+
+	// Encode and save the resized image
+	err = jpeg.Encode(file, resizedImg, nil)
+
+	if err != nil {
+		Logger.Errorw("Error encoding and saving resized image: "+link, err)
+		return "", err
+	}
+
+	defer file.Close()
 	changeOwnership(finalPath)
 	return finalPath, nil
 }

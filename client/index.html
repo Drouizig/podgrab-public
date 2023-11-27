@@ -184,10 +184,10 @@
           <div class="columns imageContainer" v-bind:class="{two:layout=='list', twelve:layout=='grid'}">
             <a style="text-decoration: none" :href="'/{{.lang}}/podcasts/'+podcast.ID+'/view'">
             <img
-              onerror="onImageError(this)"
               class="u-full-width"
-              :src="getPodcastImage(podcast)"
+              v-lazy="getPodcastImage(podcast)"
               alt=""
+              loading="lazy"
             />
           </a>
           </div>
@@ -196,10 +196,10 @@
               <div class="two columns">
             <div class="imageMobile">
               <img
-                onerror="onImageError(this)"
-                :src="getPodcastImage(podcast)"
+                v-lazy="getPodcastImage(podcast)"
                 alt=""
-            />  
+                loading="lazy"
+            />
             </div>
           </div>
           <div class="ten columns title">
@@ -233,6 +233,7 @@
             </div>
             <div class="columns"   v-bind:class="{four:layout=='list', twelve:layout=='grid'}">
 
+              {{ if isAndroid .context }}
               <a
                 class="button button-img"
                 title="{{ trans "podcast_subscribe_antennapod" .context }}"
@@ -240,7 +241,7 @@
               >
                 <img class="fas" alt="" width="32" src="/webassets/AntennaPod_Icon_2.0.1.png"/>
               </a>
-              
+              {{end}}
               <a
               class="button"
               title="{{ trans "podcast_rss" .context }}"
@@ -341,6 +342,7 @@
     <script src="/webassets/tippy-bundle.umd.min.js"></script>
     <script src="/webassets/stopword.js"></script>
     <script src="/webassets/modal/vue-modal.umd.min.js"></script>
+    <script src="/webassets/vue-lazyload.js"></script>
     <link rel="stylesheet" href="/webassets/modal/vue-modal.css">
  
     <template id="editTags">
@@ -351,7 +353,6 @@
     </template>
     <script>
       Vue.component('Modal', VueModal)
-
       Vue.component('tagger',{
         delimiters: ["${", "}"],
         data:function(){
@@ -458,6 +459,10 @@
 
     </script>
     <script>
+
+      Vue.use(VueLazyload, {
+        error: '/webassets/blank.png',
+      });
         var app = new Vue({
         delimiters: ["${", "}"],
         el: "#app",

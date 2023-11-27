@@ -10,6 +10,7 @@ services:
     volumes:
       - ./config:/config
       - ./assets:/assets
+      - ./webassets:/webassets
     ports:
       - 8080:8080
     restart: unless-stopped

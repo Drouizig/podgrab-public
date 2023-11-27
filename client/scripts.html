@@ -39,7 +39,7 @@
       if (originalText.length <= limit) {
         continue;
       }
-      var newText = originalText.substr(0, limit);
+      var newText = originalText.substr(0, limit)+'...';
 
       var newElement = document.createElement(element.tagName);
       newElement.textContent = newText;

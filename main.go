@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -140,6 +141,9 @@ func main() {
 			}
 			return message
 		},
+		"isAndroid": func(context *gin.Context) bool {
+			return strings.Contains(strings.ToLower(context.Request.UserAgent()), "android")
+		},
 	}
 	tmpl := template.Must(template.New("main").Funcs(funcMap).ParseGlob("client/*"))
 
@@ -200,7 +204,6 @@ func main() {
 	langRouter.GET("/", controllers.SelectLang)
 	assetsRouter.Static("/webassets", "./webassets")
 	assetsRouter.Static("/assets", dataPath)
-	assetsRouter.Static("/favicon.ico", dataPath)
 	router.Static(backupPath, backupPath)
 	adminRouter.POST("/podcasts", controllers.AddPodcast)
 	router.GET("/podcasts", controllers.GetAllPodcasts)
@@ -209,12 +212,11 @@ func main() {
 	adminRouter.DELETE("/podcasts/:id", controllers.DeletePodcastById)
 	router.GET("/podcasts/:id/items", controllers.GetPodcastItemsByPodcastId)
 	adminRouter.GET("/podcasts/:id/download", controllers.DownloadAllEpisodesByPodcastId)
+	adminRouter.GET("/podcasts/:id/refresh", controllers.RefreshPodcast)
 	adminRouter.DELETE("/podcasts/:id/items", controllers.DeletePodcastEpisodesById)
 	adminRouter.DELETE("/podcasts/:id/podcast", controllers.DeleteOnlyPodcastById)
 	router.GET("/podcasts/:id/pause", controllers.PausePodcastById)
 	router.GET("/podcasts/:id/unpause", controllers.UnpausePodcastById)
-	router.GET("/podcasts/:id/rss", controllers.GetRssForPodcastById)
-
 	router.GET("/podcastitems", controllers.GetAllPodcastItems)
 	router.GET("/podcastitems/:id", controllers.GetPodcastItemById)
 	assetsRouter.GET("/podcastitems/:id/image", controllers.GetPodcastItemImageById)

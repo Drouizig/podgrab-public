@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -246,7 +247,23 @@ func GetPodcastItemImageById(c *gin.Context) {
 		err := db.GetPodcastItemById(searchByIdQuery.Id, &podcast)
 		if err == nil {
 			if _, err = os.Stat(podcast.LocalImage); os.IsNotExist(err) {
-				c.Redirect(302, podcast.Image)
+				// Get the URL and parse it
+				u, err := url.Parse(podcast.Image)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse URL"})
+					return
+				}
+
+				// Modify the query parameters
+				q := u.Query()
+				q.Set("width", "300")  // Replace with the desired width
+				q.Set("height", "300") // Replace with the desired height
+
+				// Update the URL with the modified query parameters
+				u.RawQuery = q.Encode()
+
+				// Redirect to the modified URL
+				c.Redirect(302, u.String())
 			} else {
 				c.File(podcast.LocalImage)
 			}
@@ -267,7 +284,20 @@ func GetPodcastImageById(c *gin.Context) {
 		if err == nil {
 			localPath := service.GetPodcastLocalImagePath(podcast.Image, podcast.Title)
 			if _, err = os.Stat(localPath); os.IsNotExist(err) {
-				c.Redirect(302, podcast.Image)
+				// If the width an height are in the URL, reducs it to 300px (not 3000 like lumy does)
+				u, err := url.Parse(podcast.Image)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse URL"})
+					return
+				}
+
+				q := u.Query()
+				q.Set("width", "300")
+				q.Set("height", "300")
+
+				u.RawQuery = q.Encode()
+
+				c.Redirect(302, u.String())
 			} else {
 				c.File(localPath)
 			}
@@ -275,6 +305,32 @@ func GetPodcastImageById(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
+}
+
+func RefreshPodcast(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		var podcast db.Podcast
+
+		err := db.GetPodcastById(searchByIdQuery.Id, &podcast)
+		if err == nil {
+
+			isNewPodcast := podcast.LastEpisode == nil
+			if isNewPodcast {
+				db.ForceSetLastEpisodeDate(podcast.ID)
+			}
+			service.AddPodcastItems(&podcast, isNewPodcast)
+			go service.DownloadPodcastCoverImage(podcast.Image, podcast.Title)
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Oups"})
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Oups"})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "OK"})
 }
 
 func GetPodcastItemFileById(c *gin.Context) {
