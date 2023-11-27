@@ -664,11 +664,12 @@
             input.select();
             document.execCommand('copy');
             document.body.removeChild(input);
-              document.getElementById("fadeAlert").classList.remove("fade-out");
-
-            setTimeout(function() {
-              document.getElementById("fadeAlert").classList.add("fade-out");
-            }, 3000);
+            Vue.toasted.show({{trans "copy_alert" .context}}, {
+                    theme: "bubble",
+                    type: "success",
+                    position: "top-right",
+                    duration: 5000,
+                  });
 
           },
 
