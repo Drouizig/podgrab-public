@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="manifest" href="/webassets/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ trans .title .context }}</title>
     {{template "commoncss" .}}
@@ -462,6 +463,7 @@
 
       Vue.use(VueLazyload, {
         error: '/webassets/blank.png',
+        attempt: 1,
       });
         var app = new Vue({
         delimiters: ["${", "}"],
