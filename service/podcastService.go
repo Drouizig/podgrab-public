@@ -376,6 +376,7 @@ func UpdatePodcastInfo(podcast *db.Podcast, xmlData *model.PodcastData) {
 	}
 	if summary != podcast.Summary {
 		podcast.Summary = summary
+		podcast.PodcastItems = nil
 		db.UpdatePodcast(podcast)
 	}
 }

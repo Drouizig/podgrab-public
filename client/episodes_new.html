@@ -177,12 +177,14 @@
           <a v-if="filter.previousPage"
            @click=" goToPage(1)"
             class="button"
+            href="#"
             >{{ trans "page_first" .context }}</a
           >
           
           <a v-if="filter.previousPage"
            @click="goToPreviousPage()"
             class="button"
+            href="#"
             >{{ trans "page_previous" .context }}</a 
           >
          
@@ -199,6 +201,7 @@
           <a
           v-if="filter.nextPage"
             class="button"
+            href="#"
             @click="goToNextPage()"
             >{{ trans "page_next" .context }}</a
           >
@@ -207,6 +210,7 @@
           <a
           v-if="filter.totalPages>filter.page"
             class="button"
+            href="#"
             @click=" goToPage(filter.totalPages)"
             >{{ trans "page_last" .context }}</a
           >
