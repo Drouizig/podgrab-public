@@ -145,10 +145,16 @@
    
       <br />
       <p>{{ trans "home_missing" .context }}</p>
+      {{ if isAndroid .context }}
+        <p>{{ trans "home_antennapod" .context }} <a href='https://play.google.com/store/apps/details?id=de.danoeh.antennapod'><img class="fas" alt="" width="32" src="/webassets/AntennaPod_Icon_2.0.1.png"/> AntennaPod</a></p>
+      {{end}}
       <div id="app" v-cloak>
         <div class="row">
-          <div class="columns five">&nbsp;</div>
+          <div class="columns five">
+            <input v-model="filterSearch" type="text" placeholder="{{ trans "home_search" .context }}">
+          </div>
           <div class="columns seven" :class="isMobile?'alignLeft':'alignRight'">
+
             <select v-model="sortOrder" name="" id="">
               <option v-for="option in sortOptions" v-bind:value="option.key">
                 ${option.label}
@@ -217,7 +223,6 @@
             <p class="author">${podcast.Author}</p>
             <p class="useMore" v-html="podcast.Summary"></p>
             <div class="contentContainer">
-
             <div class="row">
               <div class="columns" v-bind:class="{two:layout=='list', twelve:layout=='grid'}">
                 
@@ -536,17 +541,36 @@
               
           },
           filterPodcasts(){
-            if(this.filterTag===""){
+            if(this.filterTag==="" && this.filterSearch===""){
               this.podcasts=this.allPodcasts;
             }else{
               var filtered=[];
-              for (var podast of this.allPodcasts) {
-                  for(var tag of podast.Tags){
+              for (var podcast of this.allPodcasts) {
+                var needed = 1;
+                var count = 0;
+                if(this.filterTag !== "" && this.search==="") {
+                  var needed = 2;
+                  
+                }
+
+                if(this.filterTag !== "") {
+                  for(var tag of podcast.Tags){
                     if(tag.ID===this.filterTag){
-                      filtered.push(podast);
+                      count++;
                       break;
                     }
                   }
+                }
+                if(this.filterSearch !== "") {
+                  if(podcast.Title.toUpperCase().includes(this.filterSearch.toUpperCase())) {
+                    count++;
+                  }
+                }
+
+
+                if(count == needed) {
+                  filtered.push(podcast);
+                }
               }
               this.podcasts=filtered;
           }
@@ -696,6 +720,7 @@
               this.filterTag='';
           }
 
+          this.filterSearch='';
           if (screen.width <= 760) {
                 this.isMobile= true
               } else {
@@ -734,6 +759,9 @@
             }
             this.sortPodcasts(newOrder);
           },
+          filterSearch(oldSearch, newSearch) {
+            this.filterPodcasts();
+          },
           filterTag(newTag,oldTag){
             
             if(newTag===oldTag){
@@ -764,6 +792,7 @@
           sortOrder:"dateAdded-asc",
           allTags:[],
           filterTag:'',
+          filterSearch:'',
             sortOptions:[
               {
                 key:"name-asc",

@@ -187,10 +187,10 @@ onclick="enquePodcast({{ .podcastId }})"
 <nav class="navbar">
     <div class="container">
       <ul class="navbar-list">
-        <li class="navbar-item"><a class="navbar-link" href="/{{.lang}}">{{ trans "nav_home" .context }}</a></li>
-        <li class="navbar-item"><a class="navbar-link" href="/{{.lang}}/episodes">{{ trans "nav_episodes" .context }}</a></li>
-        <li class="navbar-item"><a class="navbar-link" href="/{{.lang}}/player">{{ trans "nav_player" .context }}</a></li>
-        <li class="navbar-item"><a class="navbar-link" href="/{{.lang}}/allTags">{{ trans "nav_tags" .context }}</a></li>
+        <li class="navbar-item"><a class="navbar-link" href="/{{.lang}}"><i class="fas fa-home"></i> {{ trans "nav_home" .context }}</a></li>
+        <li class="navbar-item"><a class="navbar-link" href="/{{.lang}}/episodes"><i class="fas fa-list"></i> {{ trans "nav_episodes" .context }}</a></li>
+        <li class="navbar-item"><a class="navbar-link" href="/{{.lang}}/player"><i class="fas fa-play"></i> {{ trans "nav_player" .context }}</a></li>
+        <li class="navbar-item"><a class="navbar-link" href="/{{.lang}}/allTags"><i class="fas fa-tag"></i> {{ trans "nav_tags" .context }}</a></li>
       </ul>
       <ul class="navbar-list-lang">
         <li class="navbar-item"><a class="navbar-link" href="/br">Brezhoneg</a></li>
