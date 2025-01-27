@@ -3,6 +3,7 @@ module github.com/akhilrex/podgrab
 go 1.15
 
 require (
+	github.com/mattn/go-sqlite3 v1.14.19
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/TheHippo/podcastindex v1.0.0
